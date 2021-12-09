@@ -6,7 +6,7 @@ sc.js is a the base of the ios shortcut [COMING SOON]
 
 # Setup
 
-On mac:
+On mac/pc:
 
 `pip install -r requirements.txt`
 
@@ -22,11 +22,12 @@ It needs to be found in your `PATH` variable.
 
 `export PATH=$PATH:$(pwd)`
 
+`python req.py` to run. It will loop until you kill the job. `ctrl + c` in your terminal to give the pro lifes a break (optional).
+
+mac:
+
 You might also get a trust issue with the downloaded driver being unverified. To fix that, run 
 
 `xattr -d com.apple.quarantine chromedriver`
 
 this just tells the OS it's safe to use this driver, and Selenium will start working. See https://timonweb.com/misc/fixing-error-chromedriver-cannot-be-opened-because-the-developer-cannot-be-verified-unable-to-launch-the-chrome-browser-on-mac-os/ for more info.
-
-
-`python req.py` to run. It will loop until you kill the job. `ctrl + c` in your terminal to give the pro lifes a break (optional).
