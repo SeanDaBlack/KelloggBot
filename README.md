@@ -6,7 +6,15 @@ sc.js is a the base of the ios shortcut [COMING SOON]
 
 # Setup
 
-On mac/pc:
+## Using virtualenv
+> Recommend using pipx: https://github.com/pypa/pipx
+
+- Install virtual-env
+    - `pipx install virtualenv`
+- Install requirements
+    - `pip install -r requirements.txt`
+
+## On mac/pc:
 
 `pip install -r requirements.txt`
 
@@ -24,7 +32,7 @@ It needs to be found in your `PATH` variable.
 
 `python req.py` to run. It will loop until you kill the job. `ctrl + c` in your terminal to give the pro lifes a break (optional).
 
-mac:
+## mac:
 
 You might also get a trust issue with the downloaded driver being unverified. To fix that, run 
 
