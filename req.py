@@ -5,7 +5,10 @@ import random
 import time
 import os
 import functools
+import threading
 from faker import Faker
+
+
 fake = Faker()
 chromedriver_location = "./chromedriver"
 print = functools.partial(print, flush=True)
@@ -51,6 +54,7 @@ zip_codes = {
     'Memphis':	['38116', '38118', '38122', '38127', '38134', '38103'],
 }
 
+
 def start_driver(rand_num):
     driver = webdriver.Chrome(chromedriver_location)
     driver.get(urls[rand_num])
@@ -65,6 +69,7 @@ def start_driver(rand_num):
     driver.find_element_by_xpath(
         '//*[@id="page_content"]/div[2]/div/div/div[2]/div/div/div[2]/a').click()
     return driver
+
 
 def generate_account(driver, rand_num):
     # make fake account info and fill
@@ -170,6 +175,7 @@ def fill_out_application_and_submit(driver, rand_num):
     driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
     print(f"successfully submitted application")
 
+
 def main():
     rand_num = random.randint(0, 3)
     i = 1
@@ -198,6 +204,15 @@ def main():
         driver.close()
         time.sleep(5)
 
+
 if __name__ == '__main__':
-    main()
+    t1 = threading.Thread(target=main)
+    t2 = threading.Thread(target=main)
+
+    t1.start()
+    t2.start()
+
+    t1.join()
+    t2.join()
+
     sys.exit()
