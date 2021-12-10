@@ -6,7 +6,7 @@ import time
 import os
 from faker import Faker
 fake = Faker()
-chromedriver_location = "./chromedriver"
+chromedriver_location = "/usr/local/bin/chromedriver"
 
 urls = ['https://jobs.kellogg.com/job/Lancaster-Permanent-Production-Associate-Lancaster-PA-17601/817684800/#',
         'https://jobs.kellogg.com/job/Omaha-Permanent-Production-Associate-Omaha-NE-68103/817685900/z',
@@ -56,7 +56,7 @@ i = 1
 
 while(i < 10000):
     
-    j = random.randint(0, 4)
+    j = random.randint(0, 3)
     try:
         driver = webdriver.Chrome(chromedriver_location)
         driver.get(urls[j])
@@ -128,7 +128,8 @@ while(i < 10000):
     except:
         pass
 
-    # time.sleep(1.5)
+    #time.sleep(4)
+    #print("Close to erroring out")
     driver.implicitly_wait(10)
     # //*[@id="48:_attachLabel"] #send pic//*[@id="109:topBar"]
     driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
