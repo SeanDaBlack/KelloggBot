@@ -8,6 +8,7 @@ from faker import Faker
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
+from constants.common import *
 from constants.elementIds import *
 from constants.location import *
 from constants.urls import *
@@ -96,25 +97,25 @@ def fill_out_application_and_submit(driver, rand_num):
     print(f"successfully filled out app forms for {city}")
 
     # fill out dropdowns
-    select = Select(driver.find_element_by_id('154:_select'))
-    select.select_by_visible_text('Yes')
-    select = Select(driver.find_element_by_id('195:_select'))
+    select = Select(driver.find_element_by_id(CITIZEN_QUESTION_LABEL))
+    select.select_by_visible_text(YES)
+    select = Select(driver.find_element_by_id(COUNTRY_OF_ORIGIN_LABEL))
     select.select_by_visible_text('United States')
 
-    select = Select(driver.find_element_by_id('211:_select'))
-    select.select_by_visible_text('Yes')
-    select = Select(driver.find_element_by_id('215:_select'))
-    select.select_by_visible_text('No')
-    select = Select(driver.find_element_by_id('219:_select'))
-    select.select_by_visible_text('No')
-    select = Select(driver.find_element_by_id('223:_select'))
-    select.select_by_visible_text('No')
-    select = Select(driver.find_element_by_id('227:_select'))
-    select.select_by_visible_text('No')
-    select = Select(driver.find_element_by_id('231:_select'))
-    select.select_by_visible_text('Yes')
-    select = Select(driver.find_element_by_id('223:_select'))
-    select.select_by_visible_text('No')
+    select = Select(driver.find_element_by_id(EIGHTEEN_YEARS_OLD_LABEL))
+    select.select_by_visible_text(YES)
+    select = Select(driver.find_element_by_id(REQUIRE_SPONSORSHIP_LABEL))
+    select.select_by_visible_text(NO)
+    select = Select(driver.find_element_by_id(PREVIOUSLY_WORKED_LABEL))
+    select.select_by_visible_text(NO)
+    select = Select(driver.find_element_by_id(PREVIOUSLY_PARTNERED_LABEL))
+    select.select_by_visible_text(NO)
+    select = Select(driver.find_element_by_id(RELATIVE_WORKER_LABEL))
+    select.select_by_visible_text(NO)
+    select = Select(driver.find_element_by_id(ESSENTIAL_FUNCTIONS_LABEL))
+    select.select_by_visible_text(YES)
+    select = Select(driver.find_element_by_id(PREVIOUSLY_PARTNERED_LABEL))
+    select.select_by_visible_text(NO)
 
     time.sleep(1)
 
