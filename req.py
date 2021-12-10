@@ -69,7 +69,7 @@ def start_driver(rand_num):
 def generate_account(driver, rand_num):
     # make fake account info and fill
 
-    email = fake.email()
+    email = fake.free_email()
     password = fake.password()
     for key in data.keys():
         match key:
