@@ -53,12 +53,11 @@ def generate_account(driver, rand_num):
     select = Select(driver.find_element_by_id(COUNTRY_REGION_OF_RESIDENCE_LABEL))
     select.select_by_value(COUNTRY_CODE_US)
 
-    driver.find_element_by_xpath('//*[@id="dataPrivacyId"]').click()
+    driver.find_element_by_xpath(READ_ACCEPT_DATA_PRIVACY_STATEMENT_ANCHORTAG).click()
     time.sleep(1.5)
-    driver.find_element_by_xpath('//*[@id="dlgButton_20:"]').click()
+    driver.find_element_by_xpath(ACCEPT_BUTTON).click()
     time.sleep(2)
-    driver.find_element_by_xpath('//*[@id="fbclc_createAccountButton"]').click()
-
+    driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
 
     print(f"successfully made account for fake email {email}")
@@ -69,8 +68,8 @@ def fill_out_application_and_submit(driver, rand_num):
     city = list(CITIES_TO_STATES.keys())[rand_num]
 
     # fill out form parts of app
-    driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
-    driver.find_element_by_xpath('//*[@id="260:topBar"]').click()
+    driver.find_element_by_xpath(PROFILE_INFORMATION_DROPDOWN).click()
+    driver.find_element_by_xpath(CANDIDATE_SPECIFIC_INFORMATION_DROPDOWN).click()
 
     zip_num = random.randint(0, 4)
 

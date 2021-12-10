@@ -21,3 +21,8 @@ XPATHS_2 = {
 APPLY_NOW_BUTTON_1 = '//*[@id="content"]/div/div[2]/div/div[1]/div[1]/div/div/button'
 APPLY_NOW_BUTTON_2 = '//*[@id="applyOption-top-manual"]'
 CREATE_AN_ACCOUNT_BUTTON = '//*[@id="page_content"]/div[2]/div/div/div[2]/div/div/div[2]/a'
+READ_ACCEPT_DATA_PRIVACY_STATEMENT_ANCHORTAG = '//*[@id="dataPrivacyId"]'
+ACCEPT_BUTTON = '//*[@id="dlgButton_20:"]'
+CREATE_ACCOUNT_BUTTON = '//*[@id="fbclc_createAccountButton"]'
+PROFILE_INFORMATION_DROPDOWN = '//*[@id="109:topBar"]'
+CANDIDATE_SPECIFIC_INFORMATION_DROPDOWN = '//*[@id="260:topBar"]'
