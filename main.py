@@ -21,9 +21,9 @@ chromedriver_location = CHROMEDRIVER_PATH
 print = functools.partial(print, flush=True)
 
 
-def start_driver():
+def start_driver(random_city):
     driver = webdriver.Chrome(chromedriver_location)
-    driver.get(random.choice(URLS))
+    driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     time.sleep(2)
     driver.find_element_by_xpath(APPLY_NOW_BUTTON_1).click()
@@ -66,7 +66,7 @@ def generate_account(driver):
     print(f"successfully made account for fake email {email}")
 
 
-def fill_out_application_and_submit(driver):
+def fill_out_application_and_submit(driver, random_city):
     driver.implicitly_wait(10)
     city = random.choice(list(CITIES_TO_STATES.keys()))
 
@@ -85,8 +85,7 @@ def fill_out_application_and_submit(driver):
             case 'city':
                 info = city
             case 'zip':
-                zipcode = CITIES_TO_ZIP_CODES[city]
-                info = random.choice(zipcode)
+                info = CITIES_TO_ZIP_CODES[random_city]
             case 'job':
                 info = fake.job()
             case 'salary':
@@ -132,9 +131,9 @@ def fill_out_application_and_submit(driver):
 
 def main():
     while True:
-
+        random_city = random.choice(list(CITIES_TO_URLS.keys()))
         try:
-            driver = start_driver()
+            driver = start_driver(random_city)
         except Exception as e:
             print(f"FAILED TO START DRIVER: {e}")
             pass
@@ -148,7 +147,7 @@ def main():
             pass
 
         try:
-            fill_out_application_and_submit(driver)
+            fill_out_application_and_submit(driver, random_city)
         except Exception as e:
             print(f"FAILED TO FILL OUT APPLICATION AND SUBMIT: {e}")
             pass
