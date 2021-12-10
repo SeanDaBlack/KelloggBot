@@ -171,10 +171,9 @@ def fill_out_application_and_submit(driver, rand_num):
     print(f"successfully submitted application")
 
 def main():
-    rand_num = random.randint(0, 3)
     i = 1
     while (i < 10000):
-
+        rand_num = random.randint(0, 3)
         try:
             driver = start_driver(rand_num)
         except Exception as e:
