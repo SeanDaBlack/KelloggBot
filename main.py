@@ -129,14 +129,12 @@ def fill_out_application_and_submit(driver):
 
 
 def main():
-    rand_num = random.randint(0, 3)
-    i = 1
-    while i < 10000:
+    while True:
 
         try:
             driver = start_driver()
         except Exception as e:
-            print(f"failed to start driver: {e}")
+            print(f"FAILED TO START DRIVER: {e}")
             pass
 
         time.sleep(2)
@@ -144,13 +142,13 @@ def main():
         try:
             generate_account(driver)
         except Exception as e:
-            print(f"failed to create account: {e}")
+            print(f"FAILED TO CREATE ACCOUNT: {e}")
             pass
 
         try:
             fill_out_application_and_submit(driver)
         except Exception as e:
-            print(f"failed to fill out app and submit: {e}")
+            print(f"FAILED TO FILL OUT APPLICATION AND SUBMIT: {e}")
             pass
 
         driver.close()
