@@ -75,7 +75,7 @@ while(i < 10000):
         pass
     time.sleep(2)
     # print(random.choice(list(cities.items()))[0])
-    email = fake.email()
+    email = fake.free_email()
     password = fake.password()
     for key in data.keys():
 
