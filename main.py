@@ -9,22 +9,11 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
 from constants.urls import URLS
-from constants.xPaths import XPATHS
+from constants.xPaths import XPATHS_1, XPATHS_2
 
 fake = Faker()
 chromedriver_location = "./chromedriver"
 print = functools.partial(print, flush=True)
-
-data = {
-    'email': '//*[@id="fbclc_userName"]',
-    'email-retype': '//*[@id="fbclc_emailConf"]',
-    'pass': '//*[@id="fbclc_pwd"]',
-    'pass-retype': '//*[@id="fbclc_pwdConf"]',
-    'first_name': '//*[@id="fbclc_fName"]',
-    'last_name': '//*[@id="fbclc_lName"]',
-    'pn': '//*[@id="fbclc_phoneNumber"]',
-
-}
 
 cities = {'Lancaster': 'Pennsylvania',
           'Omaha': 'Nebraska',
@@ -61,7 +50,7 @@ def generate_account(driver, rand_num):
 
     email = fake.email()
     password = fake.password()
-    for key in data.keys():
+    for key in XPATHS_2.keys():
         match key:
             case 'email' | 'email-retype':
                 info = email
@@ -72,7 +61,7 @@ def generate_account(driver, rand_num):
             case 'pn':
                 info = fake.phone_number()
 
-        driver.find_element_by_xpath(data.get(key)).send_keys(info)
+        driver.find_element_by_xpath(XPATHS_2.get(key)).send_keys(info)
 
     time.sleep(random.randint(0, 2))
     select = Select(driver.find_element_by_id('fbclc_ituCode'))
@@ -101,7 +90,7 @@ def fill_out_application_and_submit(driver, rand_num):
 
     zip_num = random.randint(0, 4)
 
-    for key in XPATHS.keys():
+    for key in XPATHS_1.keys():
 
         match key:
             case 'resume':
@@ -119,7 +108,7 @@ def fill_out_application_and_submit(driver, rand_num):
             case 'salary':
                 info = random.randint(15, 35)
 
-        driver.find_element_by_xpath(XPATHS.get(key)).send_keys(info)
+        driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
 
     print(f"successfully filled out app forms for {city}")
 
