@@ -1,0 +1,31 @@
+{
+	"sites": [{
+			"id": 0,
+			"city": "Lancaster",
+			"state": "Pennsylvania",
+			"zipcodes": [17573, 17601, 17602, 17605, 17606, 17699],
+			"website": "https://jobs.kellogg.com/job/Lancaster-Permanent-Production-Associate-Lancaster-PA-17601/817684800/#"
+		},
+		{
+			"id": 1,
+			"city": "Omaha",
+			"state": "Nebraska",
+			"zipcodes": [68104, 68105, 68106, 68124, 68127, 68134],
+			"website": "https://jobs.kellogg.com/job/Omaha-Permanent-Production-Associate-Omaha-NE-68103/817685900/z"
+		},
+		{
+			"id": 2,
+			"city": "Battle Creek",
+			"state": "Michigan",
+			"zipcodes": [49014, 49015, 49016, 49017, 49018, 49037],
+			"website": "https://jobs.kellogg.com/job/Battle-Creek-Permanent-Production-Associate-Battle-Creek-MI-49014/817685300/"
+		},
+		{
+			"id": 3,
+			"city": "Memphis",
+			"state": "Tennessee",
+			"zipcodes": [38116, 38118, 38122, 38127, 38134, 38103],
+			"website": "https://jobs.kellogg.com/job/Memphis-Permanent-Production-Associate-Memphis-TN-38114/817685700/"
+		}
+	]
+}

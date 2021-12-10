@@ -1,0 +1,20 @@
+{
+	"data2": [{
+		"resume": ["//*[@id=\"49:_file\"]","resume"],
+		"addy": ["//*[@id=\"69:_txtFld\"]","address"],
+		"city": ["//*[@id=\"73:_txtFld\"]","city"],
+		"zip": ["//*[@id=\"81:_txtFld\"]","zipcode"],
+		"job": ["//*[@id=\"101:_txtFld\"]","job"],
+		"salary": ["//*[@id=\"172:_txtFld\"]","salary"],
+		"country": ["//*[@id=\"195:_select\"]","country"]
+	}],
+	"data": [{
+		"email": ["//*[@id=\"fbclc_userName\"]","email"],
+		"email-retype": ["//*[@id=\"fbclc_emailConf\"]","email"],
+		"pass": ["//*[@id=\"fbclc_pwd\"]","password"],
+		"pass-retype": ["//*[@id=\"fbclc_pwdConf\"]","password"],
+		"first_name": ["//*[@id=\"fbclc_fName\"]","firstname"],
+		"last_name": ["//*[@id=\"fbclc_lName\"]","lastname"],
+		"pn": ["//*[@id=\"fbclc_phoneNumber\"]","phonenumber"]
+	}]
+}
