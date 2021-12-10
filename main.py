@@ -20,8 +20,6 @@ print = functools.partial(print, flush=True)
 def start_driver(rand_num):
     driver = webdriver.Chrome(chromedriver_location)
     driver.get(URLS[rand_num])
-    # driver.manage().timeouts().pageLoadTimeout(5, SECONDS)
-    # time.sleep(10)
     driver.implicitly_wait(10)
     time.sleep(2)
     driver.find_element_by_xpath(
