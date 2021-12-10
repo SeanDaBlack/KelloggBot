@@ -38,17 +38,17 @@ data = {
 }
 
 
-cities = {'Lancaster':	'Pennsylvania',
-          'Omaha':	'Nebraska',
-          'Battle Creek':	'Michigan',
-          'Memphis':	'Tennessee',
+cities = {'Lancaster':  'Pennsylvania',
+          'Omaha':  'Nebraska',
+          'Battle Creek':   'Michigan',
+          'Memphis':    'Tennessee',
           }
 
 zip_codes = {
-    'Lancaster':	['17573', '17601', '17602', '17605', '17606', '17699'],
-    'Omaha':	['68104', '68105', '68106', '68124', '68127', '68134'],
-    'Battle Creek':	['49014', '49015', '49016', '49017', '49018', '49037'],
-    'Memphis':	['38116', '38118', '38122', '38127', '38134', '38103'],
+    'Lancaster':    ['17573', '17601', '17602', '17605', '17606', '17699'],
+    'Omaha':    ['68104', '68105', '68106', '68124', '68127', '68134'],
+    'Battle Creek': ['49014', '49015', '49016', '49017', '49018', '49037'],
+    'Memphis':  ['38116', '38118', '38122', '38127', '38134', '38103'],
 }
 
 def random_email(name=None):
@@ -300,15 +300,15 @@ def fill_out_application_and_submit(driver, rand_num):
     print(f"successfully submitted application")
 
 def main():
-    rand_num = random.randint(0, 3)
     i = 1
     while (i < 10000):
-
+        rand_num = random.randint(0, 3)
         try:
             driver = start_driver(rand_num)
         except Exception as e:
             print(f"failed to start driver: {str(e)}")
-            pass
+            driver.close()
+            continue
 
         time.sleep(2)
 
@@ -316,13 +316,15 @@ def main():
             generate_account(driver, rand_num)
         except Exception as e:
             print(f"failed to create account: {str(e)}")
-            pass
+            driver.close()
+            continue
 
         try:
             fill_out_application_and_submit(driver, rand_num)
         except Exception as e:
             print(f"failed to fill out app and submit: {str(e)}")
-            pass
+            driver.close()
+            continue
 
         driver.close()
         time.sleep(5)
