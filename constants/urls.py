@@ -4,4 +4,5 @@ URLS = ['https://jobs.kellogg.com/job/Lancaster-Permanent-Production-Associate-L
         'https://jobs.kellogg.com/job/Memphis-Permanent-Production-Associate-Memphis-TN-38114/817685700/'
         ]
 
+CHROMEDRIVER_PATH = './chromedriver'
 RESUME_PATH = '/src/resume.png'

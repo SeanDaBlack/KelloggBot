@@ -15,7 +15,9 @@ from constants.urls import *
 from constants.xPaths import *
 
 fake = Faker()
-chromedriver_location = "./chromedriver"
+chromedriver_location = CHROMEDRIVER_PATH
+# Change default in module for print to flush
+# https://stackoverflow.com/questions/230751/how-can-i-flush-the-output-of-the-print-function-unbuffer-python-output#:~:text=Changing%20the%20default%20in%20one%20module%20to%20flush%3DTrue
 print = functools.partial(print, flush=True)
 
 
