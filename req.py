@@ -6,7 +6,7 @@ import time
 import os
 from faker import Faker
 fake = Faker()
-chromedriver_location = "/usr/local/bin/chromedriver"
+chromedriver_location = "./chromedriver"
 
 urls = ['https://jobs.kellogg.com/job/Lancaster-Permanent-Production-Associate-Lancaster-PA-17601/817684800/#',
         'https://jobs.kellogg.com/job/Omaha-Permanent-Production-Associate-Omaha-NE-68103/817685900/z',
