@@ -52,26 +52,23 @@ zip_codes = {
 }
 
 def start_driver(rand_num):
-    try:
-        driver = webdriver.Chrome(chromedriver_location)
-        driver.get(urls[rand_num])
-        # driver.manage().timeouts().pageLoadTimeout(5, SECONDS)
-        # time.sleep(10)
-        driver.implicitly_wait(10)
-        time.sleep(2)
-        driver.find_element_by_xpath(
-            '//*[@id="content"]/div/div[2]/div/div[1]/div[1]/div/div/button').click()
-        driver.find_element_by_xpath(
-            '//*[@id="applyOption-top-manual"]').click()
-        driver.find_element_by_xpath(
-            '//*[@id="page_content"]/div[2]/div/div/div[2]/div/div/div[2]/a').click()
-        return driver
-    except Exception as e:
-        print(f"failed to start driver: {str(e)}")
-        return
+    driver = webdriver.Chrome(chromedriver_location)
+    driver.get(urls[rand_num])
+    # driver.manage().timeouts().pageLoadTimeout(5, SECONDS)
+    # time.sleep(10)
+    driver.implicitly_wait(10)
+    time.sleep(2)
+    driver.find_element_by_xpath(
+        '//*[@id="content"]/div/div[2]/div/div[1]/div[1]/div/div/button').click()
+    driver.find_element_by_xpath(
+        '//*[@id="applyOption-top-manual"]').click()
+    driver.find_element_by_xpath(
+        '//*[@id="page_content"]/div[2]/div/div/div[2]/div/div/div[2]/a').click()
+    return driver
 
 def generate_account(driver, rand_num):
     # make fake account info and fill
+
     email = fake.email()
     password = fake.password()
     for key in data.keys():
@@ -85,122 +82,118 @@ def generate_account(driver, rand_num):
             case 'pn':
                 info = fake.phone_number()
 
-        try:
-            driver.find_element_by_xpath(data.get(key)).send_keys(info)
-        except Exception as e:
-            print(f"failed to fill account info: {str(e)}")
+        driver.find_element_by_xpath(data.get(key)).send_keys(info)
         
-    try:
-        time.sleep(random.randint(0, 2))
-        select = Select(driver.find_element_by_id('fbclc_ituCode'))
-        select.select_by_value('US')
-        select = Select(driver.find_element_by_id('fbclc_country'))
-        select.select_by_value('US')
+    time.sleep(random.randint(0, 2))
+    select = Select(driver.find_element_by_id('fbclc_ituCode'))
+    select.select_by_value('US')
+    select = Select(driver.find_element_by_id('fbclc_country'))
+    select.select_by_value('US')
 
-        driver.find_element_by_xpath('//*[@id="dataPrivacyId"]').click()
-        time.sleep(1.5)
-        driver.find_element_by_xpath('//*[@id="dlgButton_20:"]').click()
-        time.sleep(2)
-        driver.find_element_by_xpath('//*[@id="fbclc_createAccountButton"]').click()
+    driver.find_element_by_xpath('//*[@id="dataPrivacyId"]').click()
+    time.sleep(1.5)
+    driver.find_element_by_xpath('//*[@id="dlgButton_20:"]').click()
+    time.sleep(2)
+    driver.find_element_by_xpath('//*[@id="fbclc_createAccountButton"]').click()
 
-        time.sleep(1.5)
-    except Exception as e:
-        print(f"failed to create account: {str(e)}")
-        return
+    time.sleep(1.5)
 
     print(f"successfully made account for fake email {email}")
 
 def fill_out_application_and_submit(driver, rand_num):
+
     driver.implicitly_wait(10)
     city = list(cities.keys())[rand_num]
     
     # fill out form parts of app
-    try:
-        driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
-        driver.find_element_by_xpath('//*[@id="260:topBar"]').click()
+    driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
+    driver.find_element_by_xpath('//*[@id="260:topBar"]').click()
 
-        zip_num = random.randint(0, 4)
+    zip_num = random.randint(0, 4)
 
-        for key in data2.keys():
+    for key in data2.keys():
 
-            match key:
-                case 'resume':
-                    driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
-                    info = os.getcwd()+"/src/resume.png"
-                case 'addy':
-                    info = fake.street_address()
-                case 'city':
-                    info = city
-                case 'zip':
-                    zipp = zip_codes[city]
-                    info = zipp[zip_num]
-                case 'job':
-                    info = fake.job()
-                case 'salary':
-                    info = random.randint(15, 35)
+        match key:
+            case 'resume':
+                driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
+                info = os.getcwd()+"/src/resume.png"
+            case 'addy':
+                info = fake.street_address()
+            case 'city':
+                info = city
+            case 'zip':
+                zipp = zip_codes[city]
+                info = zipp[zip_num]
+            case 'job':
+                info = fake.job()
+            case 'salary':
+                info = random.randint(15, 35)
 
-            driver.find_element_by_xpath(data2.get(key)).send_keys(info)
-    
-    except Exception as e:
-        print(f"failed to fill out app forms: {str(e)}")
-        return
+        driver.find_element_by_xpath(data2.get(key)).send_keys(info)
 
     print(f"successfully filled out app forms for {city}")
 
     # fill out dropdowns
-    try:
-        select = Select(driver.find_element_by_id('154:_select'))
-        select.select_by_visible_text('Yes')
-        select = Select(driver.find_element_by_id('195:_select'))
-        select.select_by_visible_text('United States')
+    select = Select(driver.find_element_by_id('154:_select'))
+    select.select_by_visible_text('Yes')
+    select = Select(driver.find_element_by_id('195:_select'))
+    select.select_by_visible_text('United States')
 
-        select = Select(driver.find_element_by_id('211:_select'))
-        select.select_by_visible_text('Yes')
-        select = Select(driver.find_element_by_id('215:_select'))
-        select.select_by_visible_text('No')
-        select = Select(driver.find_element_by_id('219:_select'))
-        select.select_by_visible_text('No')
-        select = Select(driver.find_element_by_id('223:_select'))
-        select.select_by_visible_text('No')
-        select = Select(driver.find_element_by_id('227:_select'))
-        select.select_by_visible_text('No')
-        select = Select(driver.find_element_by_id('231:_select'))
-        select.select_by_visible_text('Yes')
-        select = Select(driver.find_element_by_id('223:_select'))
-        select.select_by_visible_text('No')
+    select = Select(driver.find_element_by_id('211:_select'))
+    select.select_by_visible_text('Yes')
+    select = Select(driver.find_element_by_id('215:_select'))
+    select.select_by_visible_text('No')
+    select = Select(driver.find_element_by_id('219:_select'))
+    select.select_by_visible_text('No')
+    select = Select(driver.find_element_by_id('223:_select'))
+    select.select_by_visible_text('No')
+    select = Select(driver.find_element_by_id('227:_select'))
+    select.select_by_visible_text('No')
+    select = Select(driver.find_element_by_id('231:_select'))
+    select.select_by_visible_text('Yes')
+    select = Select(driver.find_element_by_id('223:_select'))
+    select.select_by_visible_text('No')
 
-        time.sleep(1)
+    time.sleep(1)
 
-        select = Select(driver.find_element_by_id('235:_select'))
-        gender = random.choice(['Male', 'Female', 'Other'])
-        select.select_by_visible_text(gender)
+    select = Select(driver.find_element_by_id('235:_select'))
+    gender = random.choice(['Male', 'Female', 'Other'])
+    select.select_by_visible_text(gender)
 
-        driver.find_element_by_xpath('//label[text()="350 LBS"]').click()
-        driver.find_element_by_xpath('//label[text()="800 LBS"]').click()
-        els = driver.find_elements_by_xpath('//label[text()="Yes"]')
-        for el in els:
-            el.click()
+    driver.find_element_by_xpath('//label[text()="350 LBS"]').click()
+    driver.find_element_by_xpath('//label[text()="800 LBS"]').click()
+    els = driver.find_elements_by_xpath('//label[text()="Yes"]')
+    for el in els:
+        el.click()
 
-        time.sleep(5)
-        driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
-    except Exception as e:
-        print(f"failed to fill out app dropdowns and submit: {str(e)}")
-        return
-
+    time.sleep(5)
+    driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
     print(f"successfully submitted application")
 
 def main():
     rand_num = random.randint(0, 3)
     i = 1
     while (i < 10000):
-        driver = start_driver(rand_num)
-        if not driver:
+
+        try:
+            driver = start_driver(rand_num)
+        except Exception as e:
+            print(f"failed to start driver: {str(e)}")
             pass
 
         time.sleep(2)
-        generate_account(driver, rand_num)
 
-        fill_out_application_and_submit(driver, rand_num)
+        try:
+            generate_account(driver, rand_num)
+        except Exception as e:
+            print(f"failed to create account: {str(e)}")
+            pass
+
+        try:
+            fill_out_application_and_submit(driver, rand_num)
+        except Exception as e:
+            print(f"failed to fill out app and submit: {str(e)}")
+            pass
 
         driver.close()
         time.sleep(5)
