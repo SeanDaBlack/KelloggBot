@@ -9,20 +9,21 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
 from constants.urls import URLS
+from constants.xPaths import XPATHS
 
 fake = Faker()
 chromedriver_location = "./chromedriver"
 print = functools.partial(print, flush=True)
 
-data2 = {
-    'resume': '//*[@id="49:_file"]',
-    'addy': '//*[@id="69:_txtFld"]',
-    'city': '//*[@id="73:_txtFld"]',
-    'zip': '//*[@id="81:_txtFld"]',
-    'job': '//*[@id="101:_txtFld"]',
-    'salary': '//*[@id="172:_txtFld"]',
-    'country': '//*[@id="195:_select"]'
-}
+# data2 = {
+#     'resume': '//*[@id="49:_file"]',
+#     'addy': '//*[@id="69:_txtFld"]',
+#     'city': '//*[@id="73:_txtFld"]',
+#     'zip': '//*[@id="81:_txtFld"]',
+#     'job': '//*[@id="101:_txtFld"]',
+#     'salary': '//*[@id="172:_txtFld"]',
+#     'country': '//*[@id="195:_select"]'
+# }
 data = {
     'email': '//*[@id="fbclc_userName"]',
     'email-retype': '//*[@id="fbclc_emailConf"]',
@@ -109,7 +110,7 @@ def fill_out_application_and_submit(driver, rand_num):
 
     zip_num = random.randint(0, 4)
 
-    for key in data2.keys():
+    for key in XPATHS.keys():
 
         match key:
             case 'resume':
@@ -127,7 +128,7 @@ def fill_out_application_and_submit(driver, rand_num):
             case 'salary':
                 info = random.randint(15, 35)
 
-        driver.find_element_by_xpath(data2.get(key)).send_keys(info)
+        driver.find_element_by_xpath(XPATHS.get(key)).send_keys(info)
 
     print(f"successfully filled out app forms for {city}")
 
