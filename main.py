@@ -19,9 +19,9 @@ chromedriver_location = "./chromedriver"
 print = functools.partial(print, flush=True)
 
 
-def start_driver(rand_num):
+def start_driver():
     driver = webdriver.Chrome(chromedriver_location)
-    driver.get(URLS[rand_num])
+    driver.get(random.choice(URLS))
     driver.implicitly_wait(10)
     time.sleep(2)
     driver.find_element_by_xpath(APPLY_NOW_BUTTON_1).click()
@@ -30,7 +30,7 @@ def start_driver(rand_num):
     return driver
 
 
-def generate_account(driver, rand_num):
+def generate_account(driver):
     # make fake account info and fill
 
     email = fake.email()
@@ -64,9 +64,9 @@ def generate_account(driver, rand_num):
     print(f"successfully made account for fake email {email}")
 
 
-def fill_out_application_and_submit(driver, rand_num):
+def fill_out_application_and_submit(driver):
     driver.implicitly_wait(10)
-    city = list(CITIES_TO_STATES.keys())[rand_num]
+    city = random.choice(list(CITIES_TO_STATES.keys()))
 
     # fill out form parts of app
     driver.find_element_by_xpath(PROFILE_INFORMATION_DROPDOWN).click()
@@ -140,7 +140,7 @@ def main():
     while i < 10000:
 
         try:
-            driver = start_driver(rand_num)
+            driver = start_driver()
         except Exception as e:
             print(f"failed to start driver: {e}")
             pass
@@ -148,7 +148,7 @@ def main():
         time.sleep(2)
 
         try:
-            generate_account(driver, rand_num)
+            generate_account(driver)
         except Exception as e:
             print(f"failed to create account: {e}")
             pass
