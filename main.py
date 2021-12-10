@@ -72,21 +72,19 @@ def fill_out_application_and_submit(driver):
     driver.find_element_by_xpath(PROFILE_INFORMATION_DROPDOWN).click()
     driver.find_element_by_xpath(CANDIDATE_SPECIFIC_INFORMATION_DROPDOWN).click()
 
-    zip_num = random.randint(0, 4)
-
     for key in XPATHS_1.keys():
 
         match key:
             case 'resume':
                 driver.find_element_by_xpath(UPLOAD_A_RESUME_BUTTON).click()
-                info = os.getcwd() + "/src/resume.png"
+                info = os.getcwd() + RESUME_PATH
             case 'addy':
                 info = fake.street_address()
             case 'city':
                 info = city
             case 'zip':
                 zipcode = CITIES_TO_ZIP_CODES[city]
-                info = zipcode[zip_num]
+                info = random.choice(zipcode)
             case 'job':
                 info = fake.job()
             case 'salary':
@@ -101,7 +99,6 @@ def fill_out_application_and_submit(driver):
     select.select_by_visible_text(YES)
     select = Select(driver.find_element_by_id(COUNTRY_OF_ORIGIN_LABEL))
     select.select_by_visible_text(FULL_NAME_US)
-
     select = Select(driver.find_element_by_id(EIGHTEEN_YEARS_OLD_LABEL))
     select.select_by_visible_text(YES)
     select = Select(driver.find_element_by_id(REQUIRE_SPONSORSHIP_LABEL))
@@ -116,18 +113,15 @@ def fill_out_application_and_submit(driver):
     select.select_by_visible_text(YES)
     select = Select(driver.find_element_by_id(PREVIOUSLY_PARTNERED_LABEL))
     select.select_by_visible_text(NO)
-
     time.sleep(1)
-
     select = Select(driver.find_element_by_id(GENDER_LABEL))
     gender = random.choice(GENDERS_LIST)
     select.select_by_visible_text(gender)
-
     driver.find_element_by_xpath(MIXER_QUESTION_1_LABEL).click()
     driver.find_element_by_xpath(MIXER_QUESTION_2_LABEL).click()
+
     els = driver.find_elements_by_xpath(LONG_PERIODS_QUESTION_LABEL)
-    for el in els:
-        el.click()
+    [el.click() for el in els]
 
     time.sleep(5)
     driver.find_element_by_xpath(APPLY_BUTTON).click()
@@ -154,7 +148,7 @@ def main():
             pass
 
         try:
-            fill_out_application_and_submit(driver, rand_num)
+            fill_out_application_and_submit(driver)
         except Exception as e:
             print(f"failed to fill out app and submit: {e}")
             pass
