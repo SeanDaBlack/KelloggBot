@@ -1,21 +1,18 @@
+import functools
+import os
+import random
+import sys
+import time
+
+from faker import Faker
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
-import requests
-import random
-import time
-import os
-import functools
-from faker import Faker
+
+from constants.urls import URLS
+
 fake = Faker()
 chromedriver_location = "./chromedriver"
 print = functools.partial(print, flush=True)
-
-urls = ['https://jobs.kellogg.com/job/Lancaster-Permanent-Production-Associate-Lancaster-PA-17601/817684800/#',
-        'https://jobs.kellogg.com/job/Omaha-Permanent-Production-Associate-Omaha-NE-68103/817685900/z',
-        'https://jobs.kellogg.com/job/Battle-Creek-Permanent-Production-Associate-Battle-Creek-MI-49014/817685300/',
-        'https://jobs.kellogg.com/job/Memphis-Permanent-Production-Associate-Memphis-TN-38114/817685700/'
-        ]
-
 
 data2 = {
     'resume': '//*[@id="49:_file"]',
@@ -37,23 +34,23 @@ data = {
 
 }
 
-
-cities = {'Lancaster':	'Pennsylvania',
-          'Omaha':	'Nebraska',
-          'Battle Creek':	'Michigan',
-          'Memphis':	'Tennessee',
+cities = {'Lancaster': 'Pennsylvania',
+          'Omaha': 'Nebraska',
+          'Battle Creek': 'Michigan',
+          'Memphis': 'Tennessee',
           }
 
 zip_codes = {
-    'Lancaster':	['17573', '17601', '17602', '17605', '17606', '17699'],
-    'Omaha':	['68104', '68105', '68106', '68124', '68127', '68134'],
-    'Battle Creek':	['49014', '49015', '49016', '49017', '49018', '49037'],
-    'Memphis':	['38116', '38118', '38122', '38127', '38134', '38103'],
+    'Lancaster': ['17573', '17601', '17602', '17605', '17606', '17699'],
+    'Omaha': ['68104', '68105', '68106', '68124', '68127', '68134'],
+    'Battle Creek': ['49014', '49015', '49016', '49017', '49018', '49037'],
+    'Memphis': ['38116', '38118', '38122', '38127', '38134', '38103'],
 }
+
 
 def start_driver(rand_num):
     driver = webdriver.Chrome(chromedriver_location)
-    driver.get(urls[rand_num])
+    driver.get(URLS[rand_num])
     # driver.manage().timeouts().pageLoadTimeout(5, SECONDS)
     # time.sleep(10)
     driver.implicitly_wait(10)
@@ -65,6 +62,7 @@ def start_driver(rand_num):
     driver.find_element_by_xpath(
         '//*[@id="page_content"]/div[2]/div/div/div[2]/div/div/div[2]/a').click()
     return driver
+
 
 def generate_account(driver, rand_num):
     # make fake account info and fill
@@ -83,7 +81,7 @@ def generate_account(driver, rand_num):
                 info = fake.phone_number()
 
         driver.find_element_by_xpath(data.get(key)).send_keys(info)
-        
+
     time.sleep(random.randint(0, 2))
     select = Select(driver.find_element_by_id('fbclc_ituCode'))
     select.select_by_value('US')
@@ -100,11 +98,11 @@ def generate_account(driver, rand_num):
 
     print(f"successfully made account for fake email {email}")
 
-def fill_out_application_and_submit(driver, rand_num):
 
+def fill_out_application_and_submit(driver, rand_num):
     driver.implicitly_wait(10)
     city = list(cities.keys())[rand_num]
-    
+
     # fill out form parts of app
     driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
     driver.find_element_by_xpath('//*[@id="260:topBar"]').click()
@@ -116,7 +114,7 @@ def fill_out_application_and_submit(driver, rand_num):
         match key:
             case 'resume':
                 driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
-                info = os.getcwd()+"/src/resume.png"
+                info = os.getcwd() + "/src/resume.png"
             case 'addy':
                 info = fake.street_address()
             case 'city':
@@ -170,6 +168,7 @@ def fill_out_application_and_submit(driver, rand_num):
     driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
     print(f"successfully submitted application")
 
+
 def main():
     rand_num = random.randint(0, 3)
     i = 1
@@ -197,6 +196,7 @@ def main():
 
         driver.close()
         time.sleep(5)
+
 
 if __name__ == '__main__':
     main()
