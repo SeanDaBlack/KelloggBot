@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import Select
 
 from constants.location import CITIES_TO_STATES, CITIES_TO_ZIP_CODES
 from constants.urls import URLS
-from constants.xPaths import XPATHS_1, XPATHS_2
+from constants.xPaths import *
 
 fake = Faker()
 chromedriver_location = "./chromedriver"
@@ -22,12 +22,9 @@ def start_driver(rand_num):
     driver.get(URLS[rand_num])
     driver.implicitly_wait(10)
     time.sleep(2)
-    driver.find_element_by_xpath(
-        '//*[@id="content"]/div/div[2]/div/div[1]/div[1]/div/div/button').click()
-    driver.find_element_by_xpath(
-        '//*[@id="applyOption-top-manual"]').click()
-    driver.find_element_by_xpath(
-        '//*[@id="page_content"]/div[2]/div/div/div[2]/div/div/div[2]/a').click()
+    driver.find_element_by_xpath(APPLY_NOW_BUTTON_1).click()
+    driver.find_element_by_xpath(APPLY_NOW_BUTTON_2).click()
+    driver.find_element_by_xpath(CREATE_AN_ACCOUNT_BUTTON).click()
     return driver
 
 

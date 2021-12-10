@@ -17,3 +17,7 @@ XPATHS_2 = {
     'last_name': '//*[@id="fbclc_lName"]',
     'pn': '//*[@id="fbclc_phoneNumber"]',
 }
+
+APPLY_NOW_BUTTON_1 = '//*[@id="content"]/div/div[2]/div/div[1]/div[1]/div/div/button'
+APPLY_NOW_BUTTON_2 = '//*[@id="applyOption-top-manual"]'
+CREATE_AN_ACCOUNT_BUTTON = '//*[@id="page_content"]/div[2]/div/div/div[2]/div/div/div[2]/a'
