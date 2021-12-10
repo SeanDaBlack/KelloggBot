@@ -1,0 +1,2 @@
+COUNTRY_REGION_CODE_LABEL = 'fbclc_ituCode'
+COUNTRY_REGION_OF_RESIDENCE_LABEL = 'fbclc_country'

@@ -8,8 +8,9 @@ from faker import Faker
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
-from constants.location import CITIES_TO_STATES, CITIES_TO_ZIP_CODES
-from constants.urls import URLS
+from constants.elementIds import *
+from constants.location import *
+from constants.urls import *
 from constants.xPaths import *
 
 fake = Faker()
@@ -47,10 +48,10 @@ def generate_account(driver, rand_num):
         driver.find_element_by_xpath(XPATHS_2.get(key)).send_keys(info)
 
     time.sleep(random.randint(0, 2))
-    select = Select(driver.find_element_by_id('fbclc_ituCode'))
-    select.select_by_value('US')
-    select = Select(driver.find_element_by_id('fbclc_country'))
-    select.select_by_value('US')
+    select = Select(driver.find_element_by_id(COUNTRY_REGION_CODE_LABEL))
+    select.select_by_value(COUNTRY_CODE_US)
+    select = Select(driver.find_element_by_id(COUNTRY_REGION_OF_RESIDENCE_LABEL))
+    select.select_by_value(COUNTRY_CODE_US)
 
     driver.find_element_by_xpath('//*[@id="dataPrivacyId"]').click()
     time.sleep(1.5)
