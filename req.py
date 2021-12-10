@@ -6,6 +6,9 @@ import time
 import os
 import functools
 from faker import Faker
+from resume_faker import make_resume
+from pdf2image import convert_from_path
+
 fake = Faker()
 chromedriver_location = "./chromedriver"
 print = functools.partial(print, flush=True)
@@ -66,19 +69,20 @@ def start_driver(rand_num):
         '//*[@id="page_content"]/div[2]/div/div/div[2]/div/div/div[2]/a').click()
     return driver
 
-def generate_account(driver, rand_num):
+def generate_account(driver, rand_num, fake_identity={'first_name': fake.first_name(), 'last_name': fake.last_name(), 'email': fake.free_email()}):
     # make fake account info and fill
 
-    email = fake.free_email()
     password = fake.password()
     for key in data.keys():
         match key:
             case 'email' | 'email-retype':
-                info = email
+                info = fake_identity['email']
             case 'pass' | 'pass-retype':
                 info = password
-            case 'first_name' | 'last_name':
-                info = fake.first_name()
+            case 'first_name':
+                info = fake_identity['first_name']
+            case 'last_name':
+                info = fake_identity['last_name']
             case 'pn':
                 info = fake.phone_number()
 
@@ -98,12 +102,17 @@ def generate_account(driver, rand_num):
 
     time.sleep(1.5)
 
-    print(f"successfully made account for fake email {email}")
+    print(f"successfully made account for fake email {fake_identity['email']}")
 
-def fill_out_application_and_submit(driver, rand_num):
+def fill_out_application_and_submit(driver, rand_num, fake_identity={'first_name': fake.first_name(), 'last_name': fake.last_name(), 'email': fake.free_email()}):
 
     driver.implicitly_wait(10)
     city = list(cities.keys())[rand_num]
+
+    # make resume
+    make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], 'resume.pdf')
+    images = convert_from_path('resume.pdf')
+    images[0].save('resume.png', 'PNG')
     
     # fill out form parts of app
     driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
@@ -116,7 +125,7 @@ def fill_out_application_and_submit(driver, rand_num):
         match key:
             case 'resume':
                 driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
-                info = os.getcwd()+"/src/resume.png"
+                info = os.getcwd()+"/resume.png"
             case 'addy':
                 info = fake.street_address()
             case 'city':
@@ -183,14 +192,24 @@ def main():
 
         time.sleep(2)
 
+        fake_first_name = fake.first_name()
+        fake_last_name = fake.last_name()
+        fake_email = fake_first_name.lower()+random.choice(['','.','_','-'])+fake_last_name.lower()+'@'+random.choice(['gmail','yahoo','hotmail','outlook','icloud'])+'.com'
+
+        fake_identity = {
+            'first_name': fake_first_name,
+            'last_name': fake_last_name,
+            'email': fake_email
+        }
+
         try:
-            generate_account(driver, rand_num)
+            generate_account(driver, rand_num, fake_identity)
         except Exception as e:
             print(f"failed to create account: {str(e)}")
             pass
 
         try:
-            fill_out_application_and_submit(driver, rand_num)
+            fill_out_application_and_submit(driver, rand_num, fake_identity)
         except Exception as e:
             print(f"failed to fill out app and submit: {str(e)}")
             pass
