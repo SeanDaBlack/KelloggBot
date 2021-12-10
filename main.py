@@ -119,30 +119,30 @@ def fill_out_application_and_submit(driver, rand_num):
 
     time.sleep(1)
 
-    select = Select(driver.find_element_by_id('235:_select'))
-    gender = random.choice(['Male', 'Female', 'Other'])
+    select = Select(driver.find_element_by_id(GENDER_LABEL))
+    gender = random.choice(GENDERS_LIST)
     select.select_by_visible_text(gender)
 
-    driver.find_element_by_xpath('//label[text()="350 LBS"]').click()
-    driver.find_element_by_xpath('//label[text()="800 LBS"]').click()
-    els = driver.find_elements_by_xpath('//label[text()="Yes"]')
+    driver.find_element_by_xpath(MIXER_QUESTION_1_LABEL).click()
+    driver.find_element_by_xpath(MIXER_QUESTION_2_LABEL).click()
+    els = driver.find_elements_by_xpath(LONG_PERIODS_QUESTION_LABEL)
     for el in els:
         el.click()
 
     time.sleep(5)
-    driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
+    driver.find_element_by_xpath(APPLY_BUTTON).click()
     print(f"successfully submitted application")
 
 
 def main():
     rand_num = random.randint(0, 3)
     i = 1
-    while (i < 10000):
+    while i < 10000:
 
         try:
             driver = start_driver(rand_num)
         except Exception as e:
-            print(f"failed to start driver: {str(e)}")
+            print(f"failed to start driver: {e}")
             pass
 
         time.sleep(2)
@@ -150,13 +150,13 @@ def main():
         try:
             generate_account(driver, rand_num)
         except Exception as e:
-            print(f"failed to create account: {str(e)}")
+            print(f"failed to create account: {e}")
             pass
 
         try:
             fill_out_application_and_submit(driver, rand_num)
         except Exception as e:
-            print(f"failed to fill out app and submit: {str(e)}")
+            print(f"failed to fill out app and submit: {e}")
             pass
 
         driver.close()
