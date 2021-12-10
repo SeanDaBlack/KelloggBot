@@ -2153,7 +2153,3 @@ def make_resume(name, email, path = 'output.pdf'):
 
     # Print
     pdf.output(path, 'F')
-
-name = faker.name()
-email = name.lower().replace(' ',random.choice(['','.','_','-']))+'@'+random.choice(['gmail','yahoo','hotmail','outlook','icloud'])+'.com'
-make_resume(name, email)
