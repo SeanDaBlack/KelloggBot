@@ -77,15 +77,15 @@ def fill_out_application_and_submit(driver, rand_num):
 
         match key:
             case 'resume':
-                driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
+                driver.find_element_by_xpath(UPLOAD_A_RESUME_BUTTON).click()
                 info = os.getcwd() + "/src/resume.png"
             case 'addy':
                 info = fake.street_address()
             case 'city':
                 info = city
             case 'zip':
-                zipp = CITIES_TO_ZIP_CODES[city]
-                info = zipp[zip_num]
+                zipcode = CITIES_TO_ZIP_CODES[city]
+                info = zipcode[zip_num]
             case 'job':
                 info = fake.job()
             case 'salary':
