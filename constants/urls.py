@@ -3,3 +3,5 @@ URLS = ['https://jobs.kellogg.com/job/Lancaster-Permanent-Production-Associate-L
         'https://jobs.kellogg.com/job/Battle-Creek-Permanent-Production-Associate-Battle-Creek-MI-49014/817685300/',
         'https://jobs.kellogg.com/job/Memphis-Permanent-Production-Associate-Memphis-TN-38114/817685700/'
         ]
+
+RESUME_PATH = '/src/resume.png'

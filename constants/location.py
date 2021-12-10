@@ -12,3 +12,4 @@ CITIES_TO_ZIP_CODES = {
 }
 
 COUNTRY_CODE_US = 'US'
+FULL_NAME_US = 'United States'

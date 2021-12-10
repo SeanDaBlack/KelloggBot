@@ -100,7 +100,7 @@ def fill_out_application_and_submit(driver, rand_num):
     select = Select(driver.find_element_by_id(CITIZEN_QUESTION_LABEL))
     select.select_by_visible_text(YES)
     select = Select(driver.find_element_by_id(COUNTRY_OF_ORIGIN_LABEL))
-    select.select_by_visible_text('United States')
+    select.select_by_visible_text(FULL_NAME_US)
 
     select = Select(driver.find_element_by_id(EIGHTEEN_YEARS_OLD_LABEL))
     select.select_by_visible_text(YES)
