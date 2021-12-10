@@ -8,25 +8,13 @@ from faker import Faker
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
+from constants.location import CITIES_TO_STATES, CITIES_TO_ZIP_CODES
 from constants.urls import URLS
 from constants.xPaths import XPATHS_1, XPATHS_2
 
 fake = Faker()
 chromedriver_location = "./chromedriver"
 print = functools.partial(print, flush=True)
-
-cities = {'Lancaster': 'Pennsylvania',
-          'Omaha': 'Nebraska',
-          'Battle Creek': 'Michigan',
-          'Memphis': 'Tennessee',
-          }
-
-zip_codes = {
-    'Lancaster': ['17573', '17601', '17602', '17605', '17606', '17699'],
-    'Omaha': ['68104', '68105', '68106', '68124', '68127', '68134'],
-    'Battle Creek': ['49014', '49015', '49016', '49017', '49018', '49037'],
-    'Memphis': ['38116', '38118', '38122', '38127', '38134', '38103'],
-}
 
 
 def start_driver(rand_num):
@@ -82,7 +70,7 @@ def generate_account(driver, rand_num):
 
 def fill_out_application_and_submit(driver, rand_num):
     driver.implicitly_wait(10)
-    city = list(cities.keys())[rand_num]
+    city = list(CITIES_TO_STATES.keys())[rand_num]
 
     # fill out form parts of app
     driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
@@ -101,7 +89,7 @@ def fill_out_application_and_submit(driver, rand_num):
             case 'city':
                 info = city
             case 'zip':
-                zipp = zip_codes[city]
+                zipp = CITIES_TO_ZIP_CODES[city]
                 info = zipp[zip_num]
             case 'job':
                 info = fake.job()
