@@ -150,6 +150,8 @@ def main():
         except Exception as e:
             print(f"FAILED TO FILL OUT APPLICATION AND SUBMIT: {e}")
             pass
+            driver.close()
+            continue
 
         driver.close()
         time.sleep(5)
