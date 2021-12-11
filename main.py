@@ -4,19 +4,28 @@ import random
 import sys
 import time
 
+import requests
+import speech_recognition as sr
 from faker import Faker
+from pydub import AudioSegment
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 
+from constants.classNames import *
 from constants.common import *
 from constants.elementIds import *
 from constants.email import *
+from constants.filenames import *
 from constants.location import *
+from constants.tagNames import *
 from constants.urls import *
 from constants.xPaths import *
 
 fake = Faker()
 chromedriver_location = CHROMEDRIVER_PATH
+filename = CAPTCHA_MP3_FILENAME
+speech_recognition_recognizer = sr.Recognizer()
 # Change default in module for print to flush
 # https://stackoverflow.com/questions/230751/how-can-i-flush-the-output-of-the-print-function-unbuffer-python-output#:~:text=Changing%20the%20default%20in%20one%20module%20to%20flush%3DTrue
 print = functools.partial(print, flush=True)
@@ -66,6 +75,58 @@ def generate_account(driver):
     time.sleep(1.5)
     driver.find_element_by_xpath(ACCEPT_BUTTON).click()
     time.sleep(2)
+    googleClass = driver.find_elements_by_class_name(CAPTCHA_BOX)[0]
+    time.sleep(2)
+    outerIFrame = googleClass.find_element_by_tag_name(IFRAME)
+    time.sleep(1)
+    outerIFrame.click()
+    time.sleep(2)
+    allIframesLen = len(driver.find_elements_by_tag_name(IFRAME))
+    time.sleep(1)
+    audioBtnFound = False
+    audioBtnIndex = -1
+    for i in range(allIframesLen):
+        driver.switch_to.default_content()
+        iframe = driver.find_elements_by_tag_name(IFRAME)[i]
+        driver.switch_to.frame(iframe)
+        driver.implicitly_wait(2)
+        try:
+            print(f'TRYING {i + 1} of {allIframesLen} ...')
+            audioBtn = driver.find_element_by_id(RECAPTCHA_AUDIO_BUTTON) or driver.find_element_by_id(RECAPTCHA_ANCHOR)
+            audioBtn.click()
+            audioBtnFound = True
+            audioBtnIndex = i
+            break
+        except Exception as e:
+            print(f'TRY {i + 1} of {allIframesLen} FAILED: {e}')
+            pass
+    if audioBtnFound:
+        try:
+            while True:
+                href = driver.find_element_by_id(AUDIO_SOURCE).get_attribute('src')
+                response = requests.get(href, stream=True)
+                saveFile(response, filename)
+                response = audioToText(filename)
+                print(f'TRYING "{response}" TO SOLVE RECAPTCHA...')
+                driver.switch_to.default_content()
+                iframe = driver.find_elements_by_tag_name(IFRAME)[audioBtnIndex]
+                driver.switch_to.frame(iframe)
+                inputButton = driver.find_element_by_id(AUDIO_RESPONSE)
+                inputButton.send_keys(response)
+                inputButton.send_keys(Keys.ENTER)
+                time.sleep(2)
+                errorMsg = driver.find_elements_by_class_name(AUDIO_ERROR_MESSAGE)[0]
+                if errorMsg.text == "" or errorMsg.value_of_css_property('display') == 'none':
+                    print("RECAPTCHA DEFEATED")
+                    break
+        except Exception as e:
+            print(e)
+            print(
+                'Oops, something happened. Check above this message for errors or check the chrome window to see if captcha locked you out...')
+    else:
+        print('Button not found. This should not happen.')
+    time.sleep(2)
+    driver.switch_to.default_content()
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
 
@@ -132,6 +193,7 @@ def fill_out_application_and_submit(driver, random_city):
     time.sleep(5)
     driver.find_element_by_xpath(APPLY_BUTTON).click()
     print(f"successfully submitted application")
+    time.sleep(5)
 
 
 def random_email(name=None):
@@ -153,6 +215,28 @@ def random_email(name=None):
 
     return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
            random.choices(EMAIL_DATA, emailChoices)[0][1]
+
+
+def audioToText(mp3Path):
+    # convert wav to mp3
+    sound = AudioSegment.from_mp3(mp3Path)
+    sound.export(CAPTCHA_WAV_FILENAME, format="wav")
+
+    with sr.AudioFile(CAPTCHA_WAV_FILENAME) as source:
+        audio_text = speech_recognition_recognizer.listen(source)
+        try:
+            text = speech_recognition_recognizer.recognize_google(audio_text)
+            print('Converting audio transcripts into text ...')
+            return text
+        except Exception as e:
+            print(e)
+            print('Sorry.. run again...')
+
+
+def saveFile(content, filename):
+    with open(filename, "wb") as handle:
+        for data in content.iter_content():
+            handle.write(data)
 
 
 def main():
