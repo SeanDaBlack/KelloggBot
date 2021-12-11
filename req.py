@@ -308,8 +308,7 @@ def fill_out_application_and_submit(driver, rand_num, fake_identity={'first_name
     os.remove(resume_filename+'.png')
 
 def main():
-    i = 1
-    while (i < 10000):
+    for _ in range(10000):
         rand_num = random.randint(0, 3)
         try:
             driver = start_driver(rand_num)

@@ -2133,7 +2133,7 @@ def make_resume(name, email, path = 'output.pdf'):
         pdf.cell(w=0, txt=faker.job(), align='L')
         pdf.ln(int(header_bigfont*0.2))
 
-        for j in range(0, random.randint(3,7)):
+        for _ in range(0, random.randint(3,7)):
             pdf.set_font(font_face, '', int(header_bigfont*0.5))
             pdf.cell(w=0, txt='- '+faker.bs(), align='L')
             pdf.ln(int(header_bigfont*0.2))
