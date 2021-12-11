@@ -6,6 +6,7 @@ import time
 
 from faker import Faker
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 
 from constants.common import *
@@ -23,7 +24,9 @@ print = functools.partial(print, flush=True)
 
 
 def start_driver(random_city):
-    driver = webdriver.Chrome(chromedriver_location)
+    options = Options()
+    options.headless = True
+    driver = webdriver.Chrome(options=options,executable_path=chromedriver_location)
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     time.sleep(2)
