@@ -110,9 +110,10 @@ def fill_out_application_and_submit(driver, rand_num, fake_identity={'first_name
     city = list(cities.keys())[rand_num]
 
     # make resume
-    make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], 'resume.pdf')
-    images = convert_from_path('resume.pdf')
-    images[0].save('resume.png', 'PNG')
+    resume_filename = fake_identity['last_name']+'-Resume'
+    make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], resume_filename+'.pdf')
+    images = convert_from_path(resume_filename+'.pdf')
+    images[0].save(resume_filename+'.png', 'PNG')
     
     # fill out form parts of app
     driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
@@ -125,7 +126,7 @@ def fill_out_application_and_submit(driver, rand_num, fake_identity={'first_name
         match key:
             case 'resume':
                 driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
-                info = os.getcwd()+"/resume.png"
+                info = os.getcwd()+'/'+resume_filename+'.png"
             case 'addy':
                 info = fake.street_address()
             case 'city':
