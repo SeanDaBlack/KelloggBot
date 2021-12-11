@@ -1,12 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
-import requests
 import random
 import time
 import os
 import functools
 from faker import Faker
 from resume_faker import make_resume
+from captcha_solver import solve_captcha
 from pdf2image import convert_from_path
 
 fake = Faker()
@@ -665,6 +665,12 @@ def generate_account(driver, rand_num, fake_identity):
     time.sleep(1.5)
     driver.find_element_by_xpath('//*[@id="dlgButton_20:"]').click()
     time.sleep(2)
+
+    # Captcha solver
+    solve_captcha(driver)
+    time.sleep(2)
+    driver.switch_to.default_content()
+
     driver.find_element_by_xpath('//*[@id="fbclc_createAccountButton"]').click()
 
     time.sleep(1.5)
@@ -792,4 +798,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    sys.exit()
+    exit()
