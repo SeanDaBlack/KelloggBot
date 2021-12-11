@@ -303,6 +303,10 @@ def fill_out_application_and_submit(driver, rand_num, fake_identity={'first_name
     driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
     print(f"successfully submitted application")
 
+    # take out the trash
+    os.remove(resume_filename+'.pdf')
+    os.remove(resume_filename+'.png')
+
 def main():
     i = 1
     while (i < 10000):

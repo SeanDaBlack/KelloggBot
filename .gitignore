@@ -1,1 +1,3 @@
 chromedriver/
+.DS_Store
+chromedriver
