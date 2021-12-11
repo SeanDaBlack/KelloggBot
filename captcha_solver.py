@@ -20,18 +20,12 @@ def audio_to_text(mp3_path):
         audio_text = recognizer.listen(source)
         try:
             text = recognizer.recognize_google(audio_text)
-            print('Converting audio transcripts into text ...')
             return(text)     
         except Exception as e:
-            print(e)
-            print('Sorry.. run again...')
-
-def saveFile(content,filename):
-    with open(filename, "wb") as handle:
-        for data in content.iter_content():
-            handle.write(data)
+            print('Failed! '+e)
 
 def solve_captcha(driver):
+    print('┌← Attempting to solve reCaptcha')
     googleClass = driver.find_elements_by_class_name('recapBorderAccessible')[0]
     time.sleep(2)
     outeriframe = googleClass.find_element_by_tag_name('iframe')
@@ -42,6 +36,8 @@ def solve_captcha(driver):
     time.sleep(1)
     audioBtnFound = False
     audioBtnIndex = -1
+
+    print('├→ Locating reCaptcha audio challenge button...')
     for index in range(len(allIframesLen)):
         driver.switch_to.default_content()
         iframe = driver.find_elements_by_tag_name('iframe')[index]
@@ -55,14 +51,22 @@ def solve_captcha(driver):
             break
         except Exception as e:
             pass
+    
     if audioBtnFound:
         try:
             while True:
+                print('├→ Downloading reCaptcha audio')
                 href = driver.find_element_by_id('audio-source').get_attribute('src')
                 response = requests.get(href, stream=True)
-                saveFile(response,audio_filename+'.mp3')
+                with open(audio_filename+'.mp3', "wb") as handle:
+                    for data in response.iter_content():
+                        handle.write(data)
+
+                print('├─┬→ Converting audio transcripts into text')
                 response = audio_to_text(audio_filename+'.mp3')
-                print(response)
+                print('│ └→ Success! "'+response+'"')
+
+                print('├→ Submitting solution')
                 driver.switch_to.default_content()
                 iframe = driver.find_elements_by_tag_name('iframe')[audioBtnIndex]
                 driver.switch_to.frame(iframe)
@@ -72,10 +76,12 @@ def solve_captcha(driver):
                 time.sleep(2)
                 errorMsg = driver.find_elements_by_class_name('rc-audiochallenge-error-message')[0]
                 if errorMsg.text == "" or errorMsg.value_of_css_property('display') == 'none':
-                    print("reCaptcha defeated!")
+                    print("└→ reCaptcha defeated!")
                     break
         except Exception as e:
-            print(e)
-            print('Oops, something happened. Check above this message for errors or check the chrome window to see if captcha locked you out...')
+            print('└→ Failed to solve challenge! '+e)
     else:
-        print('Button not found. Likely the captcha did not need solving.')
+        print('└→ Button not found. Likely the captcha did not need solving.')
+
+    # Done! Let's go home
+    driver.switch_to.default_content()

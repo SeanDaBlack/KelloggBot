@@ -666,10 +666,8 @@ def generate_account(driver, rand_num, fake_identity):
     driver.find_element_by_xpath('//*[@id="dlgButton_20:"]').click()
     time.sleep(2)
 
-    # Captcha solver
     solve_captcha(driver)
     time.sleep(2)
-    driver.switch_to.default_content()
 
     driver.find_element_by_xpath('//*[@id="fbclc_createAccountButton"]').click()
 
@@ -760,6 +758,8 @@ def fill_out_application_and_submit(driver, rand_num, fake_identity):
 def main():
     for _ in range(10000):
         rand_num = random.randint(0, 3)
+        print('starting application for '+list(cities.keys())[rand_num])
+
         try:
             driver = start_driver(rand_num)
         except Exception as e:
@@ -792,6 +792,8 @@ def main():
             print(f"failed to fill out app and submit: {str(e)}")
             driver.close()
             continue
+
+        print()
 
         driver.close()
         time.sleep(5)
