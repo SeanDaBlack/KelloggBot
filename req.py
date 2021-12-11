@@ -6,8 +6,11 @@ import time
 import os
 import functools
 from faker import Faker
+from concurrent.futures import ThreadPoolExecutor
+from webdriver_manager.chrome import ChromeDriverManager
+executor = ThreadPoolExecutor(max_workers=500)
+processes = []
 fake = Faker()
-chromedriver_location = "./chromedriver"
 print = functools.partial(print, flush=True)
 
 urls = ['https://jobs.kellogg.com/job/Lancaster-Permanent-Production-Associate-Lancaster-PA-17601/817684800/#',
@@ -176,7 +179,7 @@ def random_email(name=None):
 
 
 def start_driver(rand_num):
-    driver = webdriver.Chrome(chromedriver_location)
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(urls[rand_num])
     # driver.manage().timeouts().pageLoadTimeout(5, SECONDS)
     # time.sleep(10)
@@ -193,115 +196,126 @@ def start_driver(rand_num):
 def generate_account(driver, rand_num):
     # make fake account info and fill
     
-    name = fake.name()
-    first_name = name.split(" ")[0]
-    last_name  = name.split(" ")[1]
-    email = random_email(name)
-    password = fake.password()
-    for key in data.keys():
-        match key:
-            case 'email' | 'email-retype':
-                info = email
-            case 'pass' | 'pass-retype':
-                info = password
-            case 'first_name':
-                info = first_name
-            case 'last_name':
-                info = last_name
-            case 'pn':
-                info = fake.phone_number()
+    try:
+        name = fake.name()
+        first_name = name.split(" ")[0]
+        last_name  = name.split(" ")[1]
+        email = random_email(name)
+        password = fake.password()
+        for key in data.keys():
+            match key:
+                case 'email' | 'email-retype':
+                    info = email
+                case 'pass' | 'pass-retype':
+                    info = password
+                case 'first_name':
+                    info = first_name
+                case 'last_name':
+                    info = last_name
+                case 'pn':
+                    info = fake.phone_number()
 
-        driver.find_element_by_xpath(data.get(key)).send_keys(info)
-        
-    time.sleep(random.randint(0, 2))
-    select = Select(driver.find_element_by_id('fbclc_ituCode'))
-    select.select_by_value('US')
-    select = Select(driver.find_element_by_id('fbclc_country'))
-    select.select_by_value('US')
+            driver.find_element_by_xpath(data.get(key)).send_keys(info)
+            
+        time.sleep(random.randint(0, 2))
+        select = Select(driver.find_element_by_id('fbclc_ituCode'))
+        select.select_by_value('US')
+        select = Select(driver.find_element_by_id('fbclc_country'))
+        select.select_by_value('US')
 
-    driver.find_element_by_xpath('//*[@id="dataPrivacyId"]').click()
-    time.sleep(1.5)
-    driver.find_element_by_xpath('//*[@id="dlgButton_20:"]').click()
-    time.sleep(2)
-    driver.find_element_by_xpath('//*[@id="fbclc_createAccountButton"]').click()
+        driver.find_element_by_xpath('//*[@id="dataPrivacyId"]').click()
+        time.sleep(1.5)
+        driver.find_element_by_xpath('//*[@id="dlgButton_20:"]').click()
+        time.sleep(2)
+        driver.find_element_by_xpath('//*[@id="fbclc_createAccountButton"]').click()
 
-    time.sleep(1.5)
+        time.sleep(1.5)
 
-    print(f"successfully made account for fake email {email}")
+        print(f"successfully made account for fake email {email}")
+        fill_out_application_and_submit(driver, rand_num)
+    except Exception as e:
+        print(f"failed to create account: {str(e)}")
+        driver.close()
 
 def fill_out_application_and_submit(driver, rand_num):
+    try:
+        driver.implicitly_wait(10)
+        city = list(cities.keys())[rand_num]
+        
+        # fill out form parts of app
+        driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
+        driver.find_element_by_xpath('//*[@id="260:topBar"]').click()
 
-    driver.implicitly_wait(10)
-    city = list(cities.keys())[rand_num]
-    
-    # fill out form parts of app
-    driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
-    driver.find_element_by_xpath('//*[@id="260:topBar"]').click()
+        zip_num = random.randint(0, 4)
 
-    zip_num = random.randint(0, 4)
+        for key in data2.keys():
 
-    for key in data2.keys():
+            match key:
+                case 'resume':
+                    driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
+                    info = os.getcwd()+"/src/resume.png"
+                case 'addy':
+                    info = fake.street_address()
+                case 'city':
+                    info = city
+                case 'zip':
+                    zipp = zip_codes[city]
+                    info = zipp[zip_num]
+                case 'job':
+                    info = fake.job()
+                case 'salary':
+                    info = random.randint(15, 35)
 
-        match key:
-            case 'resume':
-                driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
-                info = os.getcwd()+"/src/resume.png"
-            case 'addy':
-                info = fake.street_address()
-            case 'city':
-                info = city
-            case 'zip':
-                zipp = zip_codes[city]
-                info = zipp[zip_num]
-            case 'job':
-                info = fake.job()
-            case 'salary':
-                info = random.randint(15, 35)
+            driver.find_element_by_xpath(data2.get(key)).send_keys(info)
 
-        driver.find_element_by_xpath(data2.get(key)).send_keys(info)
+        print(f"successfully filled out app forms for {city}")
 
-    print(f"successfully filled out app forms for {city}")
+        # fill out dropdowns
+        select = Select(driver.find_element_by_id('154:_select'))
+        select.select_by_visible_text('Yes')
+        select = Select(driver.find_element_by_id('195:_select'))
+        select.select_by_visible_text('United States')
 
-    # fill out dropdowns
-    select = Select(driver.find_element_by_id('154:_select'))
-    select.select_by_visible_text('Yes')
-    select = Select(driver.find_element_by_id('195:_select'))
-    select.select_by_visible_text('United States')
+        select = Select(driver.find_element_by_id('211:_select'))
+        select.select_by_visible_text('Yes')
+        select = Select(driver.find_element_by_id('215:_select'))
+        select.select_by_visible_text('No')
+        select = Select(driver.find_element_by_id('219:_select'))
+        select.select_by_visible_text('No')
+        select = Select(driver.find_element_by_id('223:_select'))
+        select.select_by_visible_text('No')
+        select = Select(driver.find_element_by_id('227:_select'))
+        select.select_by_visible_text('No')
+        select = Select(driver.find_element_by_id('231:_select'))
+        select.select_by_visible_text('Yes')
+        select = Select(driver.find_element_by_id('223:_select'))
+        select.select_by_visible_text('No')
 
-    select = Select(driver.find_element_by_id('211:_select'))
-    select.select_by_visible_text('Yes')
-    select = Select(driver.find_element_by_id('215:_select'))
-    select.select_by_visible_text('No')
-    select = Select(driver.find_element_by_id('219:_select'))
-    select.select_by_visible_text('No')
-    select = Select(driver.find_element_by_id('223:_select'))
-    select.select_by_visible_text('No')
-    select = Select(driver.find_element_by_id('227:_select'))
-    select.select_by_visible_text('No')
-    select = Select(driver.find_element_by_id('231:_select'))
-    select.select_by_visible_text('Yes')
-    select = Select(driver.find_element_by_id('223:_select'))
-    select.select_by_visible_text('No')
+        time.sleep(1)
 
-    time.sleep(1)
+        select = Select(driver.find_element_by_id('235:_select'))
+        gender = random.choice(['Male', 'Female', 'Other'])
+        select.select_by_visible_text(gender)
 
-    select = Select(driver.find_element_by_id('235:_select'))
-    gender = random.choice(['Male', 'Female', 'Other'])
-    select.select_by_visible_text(gender)
+        driver.find_element_by_xpath('//label[text()="350 LBS"]').click()
+        driver.find_element_by_xpath('//label[text()="800 LBS"]').click()
+        els = driver.find_elements_by_xpath('//label[text()="Yes"]')
+        for el in els:
+            el.click()
 
-    driver.find_element_by_xpath('//label[text()="350 LBS"]').click()
-    driver.find_element_by_xpath('//label[text()="800 LBS"]').click()
-    els = driver.find_elements_by_xpath('//label[text()="Yes"]')
-    for el in els:
-        el.click()
-
-    time.sleep(5)
-    driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
-    print(f"successfully submitted application")
+        time.sleep(5)
+        driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
+        print(f"successfully submitted application")
+        driver.close()
+    except Exception as e:
+        print(f"failed to fill out app and submit: {str(e)}")
+        driver.close()
 
 def main():
-    i = 1
-    while (i < 10000):
+    global processes
+    global executor
+
+    while True:
         rand_num = random.randint(0, 3)
         try:
             driver = start_driver(rand_num)
@@ -310,24 +324,9 @@ def main():
             driver.close()
             continue
 
-        time.sleep(2)
+        time.sleep(1)
 
-        try:
-            generate_account(driver, rand_num)
-        except Exception as e:
-            print(f"failed to create account: {str(e)}")
-            driver.close()
-            continue
-
-        try:
-            fill_out_application_and_submit(driver, rand_num)
-        except Exception as e:
-            print(f"failed to fill out app and submit: {str(e)}")
-            driver.close()
-            continue
-
-        driver.close()
-        time.sleep(5)
+        processes.append(executor.submit(generate_account, driver, rand_num))
 
 if __name__ == '__main__':
     main()
