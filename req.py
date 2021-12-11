@@ -12,6 +12,7 @@ executor = ThreadPoolExecutor(max_workers=500)
 processes = []
 fake = Faker()
 print = functools.partial(print, flush=True)
+count = 0
 
 urls = ['https://jobs.kellogg.com/job/Lancaster-Permanent-Production-Associate-Lancaster-PA-17601/817684800/#',
         'https://jobs.kellogg.com/job/Omaha-Permanent-Production-Associate-Omaha-NE-68103/817685900/z',
@@ -195,7 +196,7 @@ def start_driver(rand_num):
 
 def generate_account(driver, rand_num):
     # make fake account info and fill
-    
+    global count
     try:
         name = fake.name()
         first_name = name.split(" ")[0]
@@ -231,10 +232,12 @@ def generate_account(driver, rand_num):
 
         time.sleep(1.5)
 
-        print(f"successfully made account for fake email {email}")
+        print(f"Successfully made account for fake email {email}")
+        print(f"Accounts created: {str(count)}")
         fill_out_application_and_submit(driver, rand_num)
+        count += 1
     except Exception as e:
-        print(f"failed to create account: {str(e)}")
+        print(f"Failed to create account: {str(e)}")
         driver.close()
 
 def fill_out_application_and_submit(driver, rand_num):
@@ -268,7 +271,7 @@ def fill_out_application_and_submit(driver, rand_num):
 
             driver.find_element_by_xpath(data2.get(key)).send_keys(info)
 
-        print(f"successfully filled out app forms for {city}")
+        print(f"Successfully filled out app forms for {city}")
 
         # fill out dropdowns
         select = Select(driver.find_element_by_id('154:_select'))
@@ -305,10 +308,10 @@ def fill_out_application_and_submit(driver, rand_num):
 
         time.sleep(5)
         driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
-        print(f"successfully submitted application")
+        print(f"Successfully submitted application")
         driver.close()
     except Exception as e:
-        print(f"failed to fill out app and submit: {str(e)}")
+        print(f"Failed to fill out app and submit: {str(e)}")
         driver.close()
 
 def main():
@@ -320,7 +323,7 @@ def main():
         try:
             driver = start_driver(rand_num)
         except Exception as e:
-            print(f"failed to start driver: {str(e)}")
+            print(f"Failed to start driver: {str(e)}")
             driver.close()
             continue
 
@@ -331,3 +334,5 @@ def main():
 if __name__ == '__main__':
     main()
     sys.exit()
+
+
