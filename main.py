@@ -39,7 +39,7 @@ def generate_account(driver):
     name = fake.name()
     first_name = name.split(" ")[0]
     last_name = name.split(" ")[1]
-    email = random_email(name)
+    email = fake.free_email()
     password = fake.password()
     for key in XPATHS_2.keys():
         match key:
