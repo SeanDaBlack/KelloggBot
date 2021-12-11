@@ -249,7 +249,7 @@ def fill_out_application_and_submit(driver, rand_num, fake_identity={'first_name
         match key:
             case 'resume':
                 driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
-                info = os.getcwd()+'/'+resume_filename+'.png"
+                info = os.getcwd()+'/'+resume_filename+'.png'
             case 'addy':
                 info = fake.street_address()
             case 'city':
