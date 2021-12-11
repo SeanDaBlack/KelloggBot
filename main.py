@@ -68,7 +68,6 @@ def generate_account(driver):
 
 def fill_out_application_and_submit(driver, random_city):
     driver.implicitly_wait(10)
-    city = random.choice(list(CITIES_TO_STATES.keys()))
 
     # fill out form parts of app
     driver.find_element_by_xpath(PROFILE_INFORMATION_DROPDOWN).click()
@@ -83,7 +82,7 @@ def fill_out_application_and_submit(driver, random_city):
             case 'addy':
                 info = fake.street_address()
             case 'city':
-                info = city
+                info = random_city
             case 'zip':
                 info = CITIES_TO_ZIP_CODES[random_city]
             case 'job':
@@ -93,7 +92,7 @@ def fill_out_application_and_submit(driver, random_city):
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
 
-    print(f"successfully filled out app forms for {city}")
+    print(f"successfully filled out app forms for {random_city}")
 
     # fill out dropdowns
     select = Select(driver.find_element_by_id(CITIZEN_QUESTION_LABEL))
