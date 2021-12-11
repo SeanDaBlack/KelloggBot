@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import Select
 
 from constants.common import *
 from constants.elementIds import *
+from constants.email import *
 from constants.location import *
 from constants.urls import *
 from constants.xPaths import *
@@ -35,7 +36,10 @@ def start_driver(random_city):
 def generate_account(driver):
     # make fake account info and fill
 
-    email = fake.email()
+    name = fake.name()
+    first_name = name.split(" ")[0]
+    last_name = name.split(" ")[1]
+    email = random_email(name)
     password = fake.password()
     for key in XPATHS_2.keys():
         match key:
@@ -43,8 +47,10 @@ def generate_account(driver):
                 info = email
             case 'pass' | 'pass-retype':
                 info = password
-            case 'first_name' | 'last_name':
-                info = fake.first_name()
+            case 'first_name':
+                info = first_name
+            case 'last_name':
+                info = last_name
             case 'pn':
                 info = fake.phone_number()
 
@@ -126,6 +132,27 @@ def fill_out_application_and_submit(driver, random_city):
     time.sleep(5)
     driver.find_element_by_xpath(APPLY_BUTTON).click()
     print(f"successfully submitted application")
+
+
+def random_email(name=None):
+    if name is None:
+        name = fake.name()
+
+    mailGens = [lambda fn, ln, *names: fn + ln,
+                lambda fn, ln, *names: fn + "." + ln,
+                lambda fn, ln, *names: fn + "_" + ln,
+                lambda fn, ln, *names: fn[0] + "." + ln,
+                lambda fn, ln, *names: fn[0] + "_" + ln,
+                lambda fn, ln, *names: fn + ln + str(int(1 / random.random() ** 3)),
+                lambda fn, ln, *names: fn + "." + ln + str(int(1 / random.random() ** 3)),
+                lambda fn, ln, *names: fn + "_" + ln + str(int(1 / random.random() ** 3)),
+                lambda fn, ln, *names: fn[0] + "." + ln + str(int(1 / random.random() ** 3)),
+                lambda fn, ln, *names: fn[0] + "_" + ln + str(int(1 / random.random() ** 3)), ]
+
+    emailChoices = [float(line[2]) for line in EMAIL_DATA]
+
+    return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
+           random.choices(EMAIL_DATA, emailChoices)[0][1]
 
 
 def main():
