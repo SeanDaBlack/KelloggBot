@@ -1,2 +1,2 @@
-CHROMEDRIVER_PATH = '/usr/local/bin/chromedriver'
+CHROMEDRIVER_PATH = './chromedriver'
 RESUME_PATH = '/src/resume.png'
