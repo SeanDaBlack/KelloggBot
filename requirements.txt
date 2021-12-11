@@ -3,7 +3,10 @@ charset-normalizer==2.0.4
 idna==3.2
 requests==2.26.0
 selenium==3.141.0
-urllib3==1.26.6
+urllib3==1.26.7
 Faker==9.9.1
 futures==3.0.5
 webdriver-manager==3.5.2
+SpeechRecognition==3.8.1
+pydub==0.25.1
+chardet==3.0.4

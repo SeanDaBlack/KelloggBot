@@ -1,5 +1,10 @@
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 import requests
 import random
 import time
@@ -8,10 +13,16 @@ import functools
 from faker import Faker
 from concurrent.futures import ThreadPoolExecutor
 from webdriver_manager.chrome import ChromeDriverManager
+os.environ['WDM_LOG_LEVEL'] = '0'
+import speech_recognition as sr
+from pydub import AudioSegment
+filename = '1.mp3'
+r = sr.Recognizer()
 executor = ThreadPoolExecutor(max_workers=500)
 processes = []
 fake = Faker()
 print = functools.partial(print, flush=True)
+options = Options()
 count = 0
 
 urls = ['https://jobs.kellogg.com/job/Lancaster-Permanent-Production-Associate-Lancaster-PA-17601/817684800/#',
@@ -54,6 +65,28 @@ zip_codes = {
     'Battle Creek': ['49014', '49015', '49016', '49017', '49018', '49037'],
     'Memphis':  ['38116', '38118', '38122', '38127', '38134', '38103'],
 }
+
+def audioToText(mp3Path):
+    dst = "2.wav"
+
+    # convert wav to mp3                                                            
+    sound = AudioSegment.from_mp3(mp3Path)
+    sound.export(dst, format="wav")
+
+    with sr.AudioFile(dst) as source:
+        audio_text = r.listen(source)
+        try:
+            text = r.recognize_google(audio_text)
+            print('Converting audio transcripts into text ...')
+            return(text)     
+        except Exception as e:
+            print(e)
+            print('Sorry.. run again...')
+
+def saveFile(content,filename):
+    with open(filename, "wb") as handle:
+        for data in content.iter_content():
+            handle.write(data)
 
 def random_email(name=None):
     if name == None:
@@ -180,21 +213,30 @@ def random_email(name=None):
 
 
 def start_driver(rand_num):
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    global options
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    #driver.set_window_size(1440, 900)
     driver.get(urls[rand_num])
     # driver.manage().timeouts().pageLoadTimeout(5, SECONDS)
     # time.sleep(10)
     driver.implicitly_wait(10)
     time.sleep(2)
-    driver.find_element_by_xpath(
+    driver.find_element(By.XPATH,  
         '//*[@id="content"]/div/div[2]/div/div[1]/div[1]/div/div/button').click()
-    driver.find_element_by_xpath(
+    driver.find_element(By.XPATH,  
         '//*[@id="applyOption-top-manual"]').click()
-    driver.find_element_by_xpath(
+    driver.find_element(By.XPATH,  
         '//*[@id="page_content"]/div[2]/div/div/div[2]/div/div/div[2]/a').click()
     return driver
 
-def generate_account(driver, rand_num):
+def generate_account(rand_num):
+    # start driver
+    try:
+        driver = start_driver(rand_num)
+    except Exception as e:
+        print(f"Failed to start driver: {str(e)}")
+        driver.close()
+
     # make fake account info and fill
     global count
     try:
@@ -216,38 +258,89 @@ def generate_account(driver, rand_num):
                 case 'pn':
                     info = fake.phone_number()
 
-            driver.find_element_by_xpath(data.get(key)).send_keys(info)
+            driver.find_element(By.XPATH, data.get(key)).send_keys(info)
             
         time.sleep(random.randint(0, 2))
-        select = Select(driver.find_element_by_id('fbclc_ituCode'))
+        select = Select(driver.find_element(By.ID, 'fbclc_ituCode'))
         select.select_by_value('US')
-        select = Select(driver.find_element_by_id('fbclc_country'))
+        select = Select(driver.find_element(By.ID, 'fbclc_country'))
         select.select_by_value('US')
 
-        driver.find_element_by_xpath('//*[@id="dataPrivacyId"]').click()
+        driver.find_element(By.XPATH, '//*[@id="dataPrivacyId"]').click()
         time.sleep(1.5)
-        driver.find_element_by_xpath('//*[@id="dlgButton_20:"]').click()
+        driver.find_element(By.XPATH, '//*[@id="dlgButton_20:"]').click()
         time.sleep(2)
-        driver.find_element_by_xpath('//*[@id="fbclc_createAccountButton"]').click()
+
+        googleClass = driver.find_elements(By.CLASS_NAME,  'recapBorderAccessible')[0]
+        time.sleep(2)
+        outeriframe = googleClass.find_element(By.TAG_NAME, 'iframe')
+        time.sleep(1)
+        outeriframe.click()
+        time.sleep(2)
+        allIframesLen = driver.find_elements(By.TAG_NAME, 'iframe')
+        time.sleep(1)
+        audioBtnFound = False
+        audioBtnIndex = -1
+        for index in range(len(allIframesLen)):
+            driver.switch_to.default_content()
+            iframe = driver.find_elements(By.TAG_NAME, 'iframe')[index]
+            driver.switch_to.frame(iframe)
+            driver.implicitly_wait(2)
+            try:
+                audioBtn = driver.find_element(By.ID, 'recaptcha-audio-button') or driver.find_element(By.ID, 'recaptcha-anchor')
+                audioBtn.click()
+                audioBtnFound = True
+                audioBtnIndex = index
+                break
+            except Exception as e:
+                pass
+        if audioBtnFound:
+            try:
+                while True:
+                    href = driver.find_element(By.ID, 'audio-source').get_attribute('src')
+                    response = requests.get(href, stream=True)
+                    saveFile(response,filename)
+                    response = audioToText(filename)
+                    print(response)
+                    driver.switch_to.default_content()
+                    iframe = driver.find_elements(By.TAG_NAME, 'iframe')[audioBtnIndex]
+                    driver.switch_to.frame(iframe)
+                    inputbtn = driver.find_element(By.ID, 'audio-response')
+                    inputbtn.send_keys(response)
+                    inputbtn.send_keys(Keys.ENTER)
+                    time.sleep(2)
+                    errorMsg = driver.find_elements(By.CLASS_NAME,  'rc-audiochallenge-error-message')[0]
+                    if errorMsg.text == "" or errorMsg.value_of_css_property('display') == 'none':
+                        print("reCaptcha defeated!")
+                        break
+            except Exception as e:
+                print(e)
+                print('Oops, something happened. Check above this message for errors or check the chrome window to see if captcha locked you out...')
+        else:
+            print('Button not found. This should not happen.')
+
+
+        time.sleep(2)
+        driver.switch_to.default_content()
+        driver.find_element(By.XPATH, '//*[@id="fbclc_createAccountButton"]').click()
 
         time.sleep(1.5)
 
         print(f"Successfully made account for fake email {email}")
-        print(f"Accounts created: {str(count)}")
         fill_out_application_and_submit(driver, rand_num)
-        count += 1
     except Exception as e:
         print(f"Failed to create account: {str(e)}")
         driver.close()
 
 def fill_out_application_and_submit(driver, rand_num):
+    global count
     try:
         driver.implicitly_wait(10)
         city = list(cities.keys())[rand_num]
         
         # fill out form parts of app
-        driver.find_element_by_xpath('//*[@id="109:topBar"]').click()
-        driver.find_element_by_xpath('//*[@id="260:topBar"]').click()
+        driver.find_element(By.XPATH,  '//*[@id="109:topBar"]').click()
+        driver.find_element(By.XPATH,  '//*[@id="260:topBar"]').click()
 
         zip_num = random.randint(0, 4)
 
@@ -255,7 +348,7 @@ def fill_out_application_and_submit(driver, rand_num):
 
             match key:
                 case 'resume':
-                    driver.find_element_by_xpath('//*[@id="48:_attach"]/div[6]').click()
+                    driver.find_element(By.XPATH,  '//*[@id="48:_attach"]/div[6]').click()
                     info = os.getcwd()+"/src/resume.png"
                 case 'addy':
                     info = fake.street_address()
@@ -269,46 +362,48 @@ def fill_out_application_and_submit(driver, rand_num):
                 case 'salary':
                     info = random.randint(15, 35)
 
-            driver.find_element_by_xpath(data2.get(key)).send_keys(info)
+            driver.find_element(By.XPATH,  data2.get(key)).send_keys(info)
 
         print(f"Successfully filled out app forms for {city}")
 
         # fill out dropdowns
-        select = Select(driver.find_element_by_id('154:_select'))
+        select = Select(driver.find_element(By.ID,  '154:_select'))
         select.select_by_visible_text('Yes')
-        select = Select(driver.find_element_by_id('195:_select'))
+        select = Select(driver.find_element(By.ID,  '195:_select'))
         select.select_by_visible_text('United States')
 
-        select = Select(driver.find_element_by_id('211:_select'))
+        select = Select(driver.find_element(By.ID,  '211:_select'))
         select.select_by_visible_text('Yes')
-        select = Select(driver.find_element_by_id('215:_select'))
+        select = Select(driver.find_element(By.ID,  '215:_select'))
         select.select_by_visible_text('No')
-        select = Select(driver.find_element_by_id('219:_select'))
+        select = Select(driver.find_element(By.ID,  '219:_select'))
         select.select_by_visible_text('No')
-        select = Select(driver.find_element_by_id('223:_select'))
+        select = Select(driver.find_element(By.ID,  '223:_select'))
         select.select_by_visible_text('No')
-        select = Select(driver.find_element_by_id('227:_select'))
+        select = Select(driver.find_element(By.ID,  '227:_select'))
         select.select_by_visible_text('No')
-        select = Select(driver.find_element_by_id('231:_select'))
+        select = Select(driver.find_element(By.ID,  '231:_select'))
         select.select_by_visible_text('Yes')
-        select = Select(driver.find_element_by_id('223:_select'))
+        select = Select(driver.find_element(By.ID,  '223:_select'))
         select.select_by_visible_text('No')
 
         time.sleep(1)
 
-        select = Select(driver.find_element_by_id('235:_select'))
+        select = Select(driver.find_element(By.ID,  '235:_select'))
         gender = random.choice(['Male', 'Female', 'Other'])
         select.select_by_visible_text(gender)
 
-        driver.find_element_by_xpath('//label[text()="350 LBS"]').click()
-        driver.find_element_by_xpath('//label[text()="800 LBS"]').click()
+        driver.find_element(By.XPATH,  '//label[text()="350 LBS"]').click()
+        driver.find_element(By.XPATH,  '//label[text()="800 LBS"]').click()
         els = driver.find_elements_by_xpath('//label[text()="Yes"]')
         for el in els:
             el.click()
 
         time.sleep(5)
-        driver.find_element_by_xpath('//*[@id="261:_submitBtn"]').click()
+        driver.find_element(By.XPATH,  '//*[@id="261:_submitBtn"]').click()
         print(f"Successfully submitted application")
+        count += 1
+        print(f"Jobs requested: {str(count)}")
         driver.close()
     except Exception as e:
         print(f"Failed to fill out app and submit: {str(e)}")
@@ -318,18 +413,12 @@ def main():
     global processes
     global executor
 
+    speed = int(input("How many seconds between new windows?: "))
     while True:
         rand_num = random.randint(0, 3)
-        try:
-            driver = start_driver(rand_num)
-        except Exception as e:
-            print(f"Failed to start driver: {str(e)}")
-            driver.close()
-            continue
-
-        time.sleep(1)
-
-        processes.append(executor.submit(generate_account, driver, rand_num))
+        processes.append(executor.submit(generate_account, rand_num))
+        print("One operation started")
+        time.sleep(speed)
 
 if __name__ == '__main__':
     main()
