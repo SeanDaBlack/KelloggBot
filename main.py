@@ -25,6 +25,7 @@ from constants.email import *
 from constants.location import *
 from constants.urls import *
 from constants.xPaths import *
+from constants.areaCodes import *
 
 os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
 
@@ -141,7 +142,7 @@ def generate_account(driver, fake_identity):
             case 'last_name':
                 info = fake_identity['last_name']
             case 'pn':
-                info = fake.phone_number()
+                info = random_phone()
 
         driver.find_element_by_xpath(XPATHS_2.get(key)).send_keys(info)
 
@@ -252,6 +253,25 @@ def random_email(name=None):
 
     return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
            random.choices(EMAIL_DATA, emailChoices)[0][1]
+
+def random_phone(format=None):
+    area_code = str(random.choice(AREA_CODES))
+    middle_three = str(random.randint(0,999)).rjust(3,'0')
+    last_four = str(random.randint(0,9999)).rjust(4,'0')
+
+    if format is None:
+        format = random.randint(0,4)
+
+    if format==0:
+        return area_code+middle_three+last_four
+    elif format==1:
+        return area_code+' '+middle_three+' '+last_four
+    elif format==2:
+        return area_code+'.'+middle_three+'.'+last_four
+    elif format==3:
+        return area_code+'-'+middle_three+'-'+last_four
+    elif format==4:
+        return '('+area_code+') '+middle_three+'-'+last_four
 
 
 def main():
