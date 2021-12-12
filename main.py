@@ -14,6 +14,8 @@ from selenium.webdriver.common.keys import Keys
 from resume_faker import make_resume
 from pdf2image import convert_from_path
 
+from webdriver_manager.chrome import ChromeDriverManager
+
 from constants.common import *
 from constants.fileNames import *
 from constants.classNames import *
@@ -26,7 +28,6 @@ from constants.xPaths import *
 os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
 
 fake = Faker()
-chromedriver_location = CHROMEDRIVER_PATH
 # Change default in module for print to flush
 # https://stackoverflow.com/questions/230751/how-can-i-flush-the-output-of-the-print-function-unbuffer-python-output#:~:text=Changing%20the%20default%20in%20one%20module%20to%20flush%3DTrue
 print = functools.partial(print, flush=True)
@@ -112,7 +113,7 @@ def solveCaptcha(driver):
     driver.switch_to.default_content()
 
 def start_driver(random_city):
-    driver = webdriver.Chrome(chromedriver_location)
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     time.sleep(2)
