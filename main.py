@@ -132,9 +132,9 @@ def generate_account(driver, fake_identity):
     password = fake.password()
 
     for key in XPATHS_2.keys():
-        if key[:5] == 'email':
+        if key in ('email', 'email-retype'):
             info = fake_identity['email']
-        elif key[:4] == 'pass':
+        elif key in ('pass', 'pass-retype'):
             info = password
         elif key == 'first_name':
             info = fake_identity['first_name']
