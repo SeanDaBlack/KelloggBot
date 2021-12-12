@@ -3,6 +3,7 @@ import os
 import random
 import sys
 import time
+import argparse
 
 from faker import Faker
 from selenium import webdriver
@@ -13,6 +14,7 @@ from constants.common import *
 from constants.elementIds import *
 from constants.email import *
 from constants.location import *
+from constants.parser import *
 from constants.urls import *
 from constants.xPaths import *
 
@@ -22,11 +24,19 @@ chromedriver_location = CHROMEDRIVER_PATH
 # https://stackoverflow.com/questions/230751/how-can-i-flush-the-output-of-the-print-function-unbuffer-python-output#:~:text=Changing%20the%20default%20in%20one%20module%20to%20flush%3DTrue
 print = functools.partial(print, flush=True)
 
+#Option parsing
+parser = argparse.ArgumentParser(SCRIPT_DESCRIPTION,epilog=EPILOG)
+parser.add_argument('--debug',action='store_true',default=DEBUG_DISABLED,required=False,help=DEBUG_DESCRIPTION,dest='debug')
+args = parser.parse_args()
+
 
 def start_driver(random_city):
-    options = Options()
-    options.headless = True
-    driver = webdriver.Chrome(options=options,executable_path=chromedriver_location)
+    if (args.debug == DEBUG_DISABLED):
+        options = Options()
+        options.headless = True
+        driver = webdriver.Chrome(options=options,executable_path=chromedriver_location)
+    elif (args.debug == DEBUG_ENABLED):
+        driver = webdriver.Chrome(executable_path=chromedriver_location)
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     time.sleep(2)
