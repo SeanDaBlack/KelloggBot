@@ -5,11 +5,14 @@ import subprocess
 import random
 import sys
 import time
+import argparse
+from selenium.webdriver.chrome import options
 
 import speech_recognition as sr
 from faker import Faker
 import undetected_chromedriver
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.common.by import By
@@ -26,6 +29,7 @@ from constants.classNames import *
 from constants.elementIds import *
 from constants.email import *
 from constants.location import *
+from constants.parser import *
 from constants.urls import *
 from constants.xPaths import *
 
@@ -36,6 +40,11 @@ fake = Faker()
 # Add printf: print with flush by default. This is for python 2 support.
 # https://stackoverflow.com/questions/230751/how-can-i-flush-the-output-of-the-print-function-unbuffer-python-output#:~:text=Changing%20the%20default%20in%20one%20module%20to%20flush%3DTrue
 printf = functools.partial(print, flush=True)
+
+#Option parsing
+parser = argparse.ArgumentParser(SCRIPT_DESCRIPTION,epilog=EPILOG)
+parser.add_argument('--debug',action='store_true',default=DEBUG_DISABLED,required=False,help=DEBUG_DESCRIPTION,dest='debug')
+args = parser.parse_args()
 
 r = sr.Recognizer()
 
@@ -92,6 +101,14 @@ def solveCaptcha(driver):
     if audioBtnFound:
         try:
             while True:
+                """
+                try:
+                    time.sleep(3)
+                    WebDriverWait(driver, 20).until(expected_conditions.presence_of_element_located((By.ID, AUDIO_SOURCE)))
+                except Exception as e:
+                    print(f"Waiting broke lmao {e}")
+                """
+                driver.implicitly_wait(10)
                 href = driver.find_element_by_id(AUDIO_SOURCE).get_attribute('src')
                 response = requests.get(href, stream=True)
                 saveFile(response, CAPTCHA_MP3_FILENAME)
@@ -118,7 +135,15 @@ def solveCaptcha(driver):
     driver.switch_to.default_content()
 
 def start_driver(random_city):
-    driver = webdriver.Chrome()
+    options = Options()
+    if (args.debug == DEBUG_DISABLED):
+        options.add_argument(f"user-agent={USER_AGENT}")
+        options.add_argument('disable-blink-features=AutomationControlled')
+        options.headless = True
+        driver = webdriver.Chrome(options=options)
+        driver.set_window_size(1440, 900)
+    elif (args.debug == DEBUG_ENABLED):
+        driver = webdriver.Chrome()
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, CREATE_AN_ACCOUNT_BUTTON)))
@@ -160,6 +185,7 @@ def generate_account(driver, fake_identity):
     driver.find_element_by_xpath(ACCEPT_BUTTON).click()
     time.sleep(2)
     solveCaptcha(driver)
+    time.sleep(2)
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
 
