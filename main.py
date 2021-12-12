@@ -8,6 +8,7 @@ import time
 
 import speech_recognition as sr
 from faker import Faker
+import undetected_chromedriver
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
@@ -117,7 +118,7 @@ def solveCaptcha(driver):
     driver.switch_to.default_content()
 
 def start_driver(random_city):
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    driver = webdriver.Chrome()
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, CREATE_AN_ACCOUNT_BUTTON)))
@@ -259,6 +260,7 @@ def random_email(name=None):
 
 
 def main():
+    undetected_chromedriver.install()
     while True:
         random_city = random.choice(list(CITIES_TO_URLS.keys()))
         try:
