@@ -22,7 +22,7 @@ It needs to be found in your `PATH` variable.
 
 `export PATH=$PATH:$(pwd)`
 
-`python req.py` to run. It will loop until you kill the job. `ctrl + c` in your terminal to give the pro lifes a break (optional).
+`python req.py` to run. It will loop until you kill the job. `ctrl + c` in your terminal to give the hiring managers a break (optional).
 
 mac:
 
