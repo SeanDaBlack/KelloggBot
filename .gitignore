@@ -1,1 +1,6 @@
+*.pyc
+*.pyo
+.DS_Store
+.Rhistory
+chromedriver
 chromedriver/

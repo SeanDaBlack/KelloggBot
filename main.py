@@ -1,19 +1,27 @@
+import requests
 import functools
 import os
+import subprocess
 import random
 import sys
 import time
 
+import speech_recognition as sr
 from faker import Faker
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
 
 from constants.common import *
+from constants.fileNames import *
+from constants.classNames import *
 from constants.elementIds import *
 from constants.email import *
 from constants.location import *
 from constants.urls import *
 from constants.xPaths import *
+
+os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
 
 fake = Faker()
 chromedriver_location = CHROMEDRIVER_PATH
@@ -21,6 +29,85 @@ chromedriver_location = CHROMEDRIVER_PATH
 # https://stackoverflow.com/questions/230751/how-can-i-flush-the-output-of-the-print-function-unbuffer-python-output#:~:text=Changing%20the%20default%20in%20one%20module%20to%20flush%3DTrue
 print = functools.partial(print, flush=True)
 
+r = sr.Recognizer()
+
+def audioToText(mp3Path):
+    # deletes old file
+    try:
+        os.remove(CAPTCHA_WAV_FILENAME)
+    except FileNotFoundError:
+        pass
+    # convert wav to mp3                                                            
+    subprocess.run(f"ffmpeg -i {mp3Path} {CAPTCHA_WAV_FILENAME}", shell=True, timeout=5)
+
+    with sr.AudioFile(CAPTCHA_WAV_FILENAME) as source:
+        audio_text = r.listen(source)
+        try:
+            text = r.recognize_google(audio_text)
+            print('Converting audio transcripts into text ...')
+            return(text)     
+        except Exception as e:
+            print(e)
+            print('Sorry.. run again...')
+
+def saveFile(content,filename):
+    with open(filename, "wb") as handle:
+        for data in content.iter_content():
+            handle.write(data)
+# END TEST
+
+def solveCaptcha(driver):
+    # Logic to click through the reCaptcha to the Audio Challenge, download the challenge mp3 file, run it through the audioToText function, and send answer
+    googleClass = driver.find_elements_by_class_name(CAPTCHA_BOX)[0]
+    time.sleep(2)
+    outeriframe = googleClass.find_element_by_tag_name('iframe')
+    time.sleep(1)
+    outeriframe.click()
+    time.sleep(2)
+    allIframesLen = driver.find_elements_by_tag_name('iframe')
+    time.sleep(1)
+    audioBtnFound = False
+    audioBtnIndex = -1
+    for index in range(len(allIframesLen)):
+        driver.switch_to.default_content()
+        iframe = driver.find_elements_by_tag_name('iframe')[index]
+        driver.switch_to.frame(iframe)
+        driver.implicitly_wait(2)
+        try:
+            audioBtn = driver.find_element_by_id(RECAPTCHA_AUDIO_BUTTON) or driver.find_element_by_id(RECAPTCHA_ANCHOR)
+            audioBtn.click()
+            audioBtnFound = True
+            audioBtnIndex = index
+            break
+        except Exception as e:
+            pass
+    if audioBtnFound:
+        try:
+            while True:
+                href = driver.find_element_by_id(AUDIO_SOURCE).get_attribute('src')
+                response = requests.get(href, stream=True)
+                saveFile(response, CAPTCHA_MP3_FILENAME)
+                response = audioToText(CAPTCHA_MP3_FILENAME)
+                print(response)
+                driver.switch_to.default_content()
+                iframe = driver.find_elements_by_tag_name('iframe')[audioBtnIndex]
+                driver.switch_to.frame(iframe)
+                inputbtn = driver.find_element_by_id(AUDIO_RESPONSE)
+                inputbtn.send_keys(response)
+                inputbtn.send_keys(Keys.ENTER)
+                time.sleep(2)
+                errorMsg = driver.find_elements_by_class_name(AUDIO_ERROR_MESSAGE)[0]
+                if errorMsg.text == "" or errorMsg.value_of_css_property('display') == 'none':
+                    print("reCaptcha defeated!")
+                    break
+        except Exception as e:
+            print(e)
+            print('Oops, something happened. Check above this message for errors or check the chrome window to see if captcha locked you out...')
+    else:
+        print('Button not found. This should not happen.')
+
+    time.sleep(2)
+    driver.switch_to.default_content()
 
 def start_driver(random_city):
     driver = webdriver.Chrome(chromedriver_location)
@@ -66,6 +153,7 @@ def generate_account(driver):
     time.sleep(1.5)
     driver.find_element_by_xpath(ACCEPT_BUTTON).click()
     time.sleep(2)
+    solveCaptcha(driver)
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
 
