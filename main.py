@@ -8,6 +8,8 @@ from faker import Faker
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
+from webdriver_manager.chrome import ChromeDriverManager
+
 from constants.common import *
 from constants.elementIds import *
 from constants.email import *
@@ -16,14 +18,13 @@ from constants.urls import *
 from constants.xPaths import *
 
 fake = Faker()
-chromedriver_location = CHROMEDRIVER_PATH
 # Change default in module for print to flush
 # https://stackoverflow.com/questions/230751/how-can-i-flush-the-output-of-the-print-function-unbuffer-python-output#:~:text=Changing%20the%20default%20in%20one%20module%20to%20flush%3DTrue
 print = functools.partial(print, flush=True)
 
 
 def start_driver(random_city):
-    driver = webdriver.Chrome(chromedriver_location)
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     time.sleep(2)

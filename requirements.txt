@@ -5,3 +5,4 @@ requests==2.26.0
 selenium==3.141.0
 urllib3==1.26.6
 Faker==9.9.1
+webdriver-manager==3.5.2
