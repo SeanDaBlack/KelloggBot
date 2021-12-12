@@ -10,21 +10,13 @@ On mac/pc:
 
 `pip install -r requirements.txt`
 
-You will probably need to go get the chrome driver to make selenium work, as they are version-specific. The one in the repo might not do it for you. Find your chrome version by going to **Chrome** >> **About Google Chrome**. 
+This will install `webdriver-manager` to automatically download the correct chrome driver. If you are having issues opening having it open chrome, check https://github.com/SergeyPirogov/webdriver_manager.
 
-This will open a tab that shows you your verison. Visit https://sites.google.com/chromium.org/driver/downloads and download the driver for your version.
-
-folder. Extract the downloaded zip file. Move the extracted chromedriver binary to this project folder
-
-`mv ~/Downloads/chromedriver .`
-
-It needs to be found in your `PATH` variable.
-
-`export PATH=$PATH:$(pwd)`
+# Run
 
 `python req.py` to run. It will loop until you kill the job. `ctrl + c` in your terminal to give the pro lifes a break (optional).
 
-mac:
+# Chrome drivers on MacOS
 
 You might also get a trust issue with the downloaded driver being unverified. To fix that, run 
 
