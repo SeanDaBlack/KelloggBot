@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # KelloggBot
 Credit to SeanDaBlack for the basis of the script.
 
@@ -37,4 +36,4 @@ this just tells the OS it's safe to use this driver, and Selenium will start wor
 
 You will also need to install ffmpeg if it is not already installed: [Mac installation guide](https://superuser.com/a/624562) [Windows installation guide](https://www.wikihow.com/Install-FFmpeg-on-Windows)
 
->>>>>>> 6c69435978e0191b651c8d37b0193632bdafde91
+
