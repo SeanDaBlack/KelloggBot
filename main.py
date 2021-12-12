@@ -9,7 +9,9 @@ import time
 import speech_recognition as sr
 from faker import Faker
 from selenium import webdriver
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from resume_faker import make_resume
 from pdf2image import convert_from_path
@@ -160,13 +162,14 @@ def generate_account(driver, fake_identity):
 
 
 def fill_out_application_and_submit(driver, random_city, fake_identity):
-    driver.implicitly_wait(10)
-
     # make resume
     resume_filename = fake_identity['last_name']+'-Resume'
     make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], resume_filename+'.pdf')
     images = convert_from_path(resume_filename+'.pdf')
     images[0].save(resume_filename+'.png', 'PNG')
+
+    # wait for page to load
+    WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, PROFILE_INFORMATION_DROPDOWN)))
 
     # fill out form parts of app
     driver.find_element_by_xpath(PROFILE_INFORMATION_DROPDOWN).click()
