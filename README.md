@@ -10,15 +10,9 @@ On mac/pc:
 
 `pip install -r requirements.txt`
 
+This will install `webdriver-manager` to automatically download the correct chrome driver. If you are having issues opening having it open chrome, check https://github.com/SergeyPirogov/webdriver_manager.
+
 Poppler must also be installed for pdf2image. Follow the instructions at https://pdf2image.readthedocs.io/en/latest/installation.html to install.
-
-You will probably need to go get the chrome driver to make selenium work, as they are version-specific. The one in the repo might not do it for you. Find your chrome version by going to **Chrome** >> **About Google Chrome**. 
-
-This will open a tab that shows you your verison. Visit https://sites.google.com/chromium.org/driver/downloads and download the driver for your version.
-
-folder. Extract the downloaded zip file. Move the extracted chromedriver binary to this project folder
-
-`mv ~/Downloads/chromedriver .`
 
 It needs to be found in your `PATH` variable.
 
