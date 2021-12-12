@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # KelloggBot
 Credit to SeanDaBlack for the basis of the script.
 
@@ -9,6 +10,8 @@ sc.js is a the base of the ios shortcut [COMING SOON]
 On mac/pc:
 
 `pip install -r requirements.txt`
+
+Poppler must also be installed for pdf2image. Follow the instructions at https://pdf2image.readthedocs.io/en/latest/installation.html to install.
 
 You will probably need to go get the chrome driver to make selenium work, as they are version-specific. The one in the repo might not do it for you. Find your chrome version by going to **Chrome** >> **About Google Chrome**. 
 
@@ -33,3 +36,5 @@ You might also get a trust issue with the downloaded driver being unverified. To
 this just tells the OS it's safe to use this driver, and Selenium will start working. See https://timonweb.com/misc/fixing-error-chromedriver-cannot-be-opened-because-the-developer-cannot-be-verified-unable-to-launch-the-chrome-browser-on-mac-os/ for more info.
 
 You will also need to install ffmpeg if it is not already installed: [Mac installation guide](https://superuser.com/a/624562) [Windows installation guide](https://www.wikihow.com/Install-FFmpeg-on-Windows)
+
+>>>>>>> 6c69435978e0191b651c8d37b0193632bdafde91

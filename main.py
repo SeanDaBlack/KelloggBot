@@ -11,6 +11,8 @@ from faker import Faker
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
+from resume_faker import make_resume
+from pdf2image import convert_from_path
 
 from constants.common import *
 from constants.fileNames import *
@@ -120,24 +122,21 @@ def start_driver(random_city):
     return driver
 
 
-def generate_account(driver):
+def generate_account(driver, fake_identity):
     # make fake account info and fill
 
-    name = fake.name()
-    first_name = name.split(" ")[0]
-    last_name = name.split(" ")[1]
     email = fake.free_email()
     password = fake.password()
     for key in XPATHS_2.keys():
         match key:
             case 'email' | 'email-retype':
-                info = email
+                info = fake_identity['email']
             case 'pass' | 'pass-retype':
                 info = password
             case 'first_name':
-                info = first_name
+                info = fake_identity['first_name']
             case 'last_name':
-                info = last_name
+                info = fake_identity['last_name']
             case 'pn':
                 info = fake.phone_number()
 
@@ -160,8 +159,14 @@ def generate_account(driver):
     print(f"successfully made account for fake email {email}")
 
 
-def fill_out_application_and_submit(driver, random_city):
+def fill_out_application_and_submit(driver, random_city, fake_identity):
     driver.implicitly_wait(10)
+
+    # make resume
+    resume_filename = fake_identity['last_name']+'-Resume'
+    make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], resume_filename+'.pdf')
+    images = convert_from_path(resume_filename+'.pdf')
+    images[0].save(resume_filename+'.png', 'PNG')
 
     # fill out form parts of app
     driver.find_element_by_xpath(PROFILE_INFORMATION_DROPDOWN).click()
@@ -172,7 +177,7 @@ def fill_out_application_and_submit(driver, random_city):
         match key:
             case 'resume':
                 driver.find_element_by_xpath(UPLOAD_A_RESUME_BUTTON).click()
-                info = os.getcwd() + RESUME_PATH
+                info = os.getcwd() + '/'+resume_filename+'.png'
             case 'addy':
                 info = fake.street_address()
             case 'city':
@@ -221,6 +226,9 @@ def fill_out_application_and_submit(driver, random_city):
     driver.find_element_by_xpath(APPLY_BUTTON).click()
     print(f"successfully submitted application")
 
+    # take out the trash
+    os.remove(resume_filename+'.pdf')
+    os.remove(resume_filename+'.png')
 
 def random_email(name=None):
     if name is None:
@@ -254,14 +262,24 @@ def main():
 
         time.sleep(2)
 
+        fake_first_name = fake.first_name()
+        fake_last_name = fake.last_name()
+        fake_email = random_email(fake_first_name+' '+fake_last_name)
+
+        fake_identity = {
+            'first_name': fake_first_name,
+            'last_name': fake_last_name,
+            'email': fake_email
+        }
+
         try:
-            generate_account(driver)
+            generate_account(driver, fake_identity)
         except Exception as e:
             print(f"FAILED TO CREATE ACCOUNT: {e}")
             pass
 
         try:
-            fill_out_application_and_submit(driver, random_city)
+            fill_out_application_and_submit(driver, random_city, fake_identity)
         except Exception as e:
             print(f"FAILED TO FILL OUT APPLICATION AND SUBMIT: {e}")
             pass
