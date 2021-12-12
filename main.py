@@ -6,6 +6,10 @@ import random
 import sys
 import time
 
+from concurrent.futures import ThreadPoolExecutor
+executor = ThreadPoolExecutor(max_workers=500)
+processes = []
+
 import speech_recognition as sr
 from faker import Faker
 from selenium import webdriver
@@ -114,8 +118,7 @@ def solveCaptcha(driver):
     time.sleep(2)
     driver.switch_to.default_content()
 
-def start_driver(random_city):
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+def initialize_driver(random_city, driver):
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     time.sleep(2)
@@ -253,14 +256,20 @@ def random_email(name=None):
     return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
            random.choices(EMAIL_DATA, emailChoices)[0][1]
 
+def run():
+    try:
+        driver = webdriver.Chrome(ChromeDriverManager().install()) # Start driver
+    except:
+        print(f"FAILED TO START DRIVER: {e}")
+        # No pass, this error is fatal
 
-def main():
+
     while True:
         random_city = random.choice(list(CITIES_TO_URLS.keys()))
         try:
-            driver = start_driver(random_city)
+            initialize_driver(random_city, driver)
         except Exception as e:
-            print(f"FAILED TO START DRIVER: {e}")
+            print(f"FAILED TO INITIALIZE DRIVER: {e}")
             pass
 
         time.sleep(2)
@@ -286,11 +295,18 @@ def main():
         except Exception as e:
             print(f"FAILED TO FILL OUT APPLICATION AND SUBMIT: {e}")
             pass
-            driver.close()
             continue
 
-        driver.close()
         time.sleep(5)
+
+def main():
+    global processes
+    global executor
+
+    parallel = int(input("How many parallel windows?: "))
+
+    for i in range(parallel):
+        processes.append(executor.submit(run))
 
 
 if __name__ == '__main__':
