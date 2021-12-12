@@ -117,7 +117,7 @@ def start_driver(random_city):
     driver = webdriver.Chrome(chromedriver_location)
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
-    time.sleep(2)
+    WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, CREATE_AN_ACCOUNT_BUTTON)))
     driver.find_element_by_xpath(APPLY_NOW_BUTTON_1).click()
     driver.find_element_by_xpath(APPLY_NOW_BUTTON_2).click()
     driver.find_element_by_xpath(CREATE_AN_ACCOUNT_BUTTON).click()
