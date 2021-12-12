@@ -29,9 +29,9 @@ os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which i
 
 fake = Faker()
 chromedriver_location = CHROMEDRIVER_PATH
-# Change default in module for print to flush
+# Change default in module for printf to flush
 # https://stackoverflow.com/questions/230751/how-can-i-flush-the-output-of-the-print-function-unbuffer-python-output#:~:text=Changing%20the%20default%20in%20one%20module%20to%20flush%3DTrue
-print = functools.partial(print, flush=True)
+printf = functools.partial(print, flush=True)
 
 r = sr.Recognizer()
 
@@ -48,11 +48,11 @@ def audioToText(mp3Path):
         audio_text = r.listen(source)
         try:
             text = r.recognize_google(audio_text)
-            print('Converting audio transcripts into text ...')
+            printf('Converting audio transcripts into text ...')
             return(text)     
         except Exception as e:
-            print(e)
-            print('Sorry.. run again...')
+            printf(e)
+            printf('Sorry.. run again...')
 
 def saveFile(content,filename):
     with open(filename, "wb") as handle:
@@ -92,7 +92,7 @@ def solveCaptcha(driver):
                 response = requests.get(href, stream=True)
                 saveFile(response, CAPTCHA_MP3_FILENAME)
                 response = audioToText(CAPTCHA_MP3_FILENAME)
-                print(response)
+                printf(response)
                 driver.switch_to.default_content()
                 iframe = driver.find_elements_by_tag_name('iframe')[audioBtnIndex]
                 driver.switch_to.frame(iframe)
@@ -102,13 +102,13 @@ def solveCaptcha(driver):
                 time.sleep(2)
                 errorMsg = driver.find_elements_by_class_name(AUDIO_ERROR_MESSAGE)[0]
                 if errorMsg.text == "" or errorMsg.value_of_css_property('display') == 'none':
-                    print("reCaptcha defeated!")
+                    printf("reCaptcha defeated!")
                     break
         except Exception as e:
-            print(e)
-            print('Oops, something happened. Check above this message for errors or check the chrome window to see if captcha locked you out...')
+            printf(e)
+            printf('Oops, something happened. Check above this message for errors or check the chrome window to see if captcha locked you out...')
     else:
-        print('Button not found. This should not happen.')
+        printf('Button not found. This should not happen.')
 
     time.sleep(2)
     driver.switch_to.default_content()
@@ -127,20 +127,21 @@ def start_driver(random_city):
 def generate_account(driver, fake_identity):
     # make fake account info and fill
 
+    info = ''
     email = fake.free_email()
     password = fake.password()
+
     for key in XPATHS_2.keys():
-        match key:
-            case 'email' | 'email-retype':
-                info = fake_identity['email']
-            case 'pass' | 'pass-retype':
-                info = password
-            case 'first_name':
-                info = fake_identity['first_name']
-            case 'last_name':
-                info = fake_identity['last_name']
-            case 'pn':
-                info = fake.phone_number()
+        if key[:5] == 'email':
+            info = fake_identity['email']
+        elif key[:4] == 'pass':
+            info = password
+        elif key == 'first_name':
+            info = fake_identity['first_name']
+        elif key == 'last_name':
+            info = fake_identity['last_name']
+        elif key == 'pn':
+            info = fake.phone_number()
 
         driver.find_element_by_xpath(XPATHS_2.get(key)).send_keys(info)
 
@@ -158,7 +159,7 @@ def generate_account(driver, fake_identity):
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
 
-    print(f"successfully made account for fake email {email}")
+    printf(f"successfully made account for fake email {email}")
 
 
 def fill_out_application_and_submit(driver, random_city, fake_identity):
@@ -177,24 +178,23 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
 
     for key in XPATHS_1.keys():
 
-        match key:
-            case 'resume':
-                driver.find_element_by_xpath(UPLOAD_A_RESUME_BUTTON).click()
-                info = os.getcwd() + '/'+resume_filename+'.png'
-            case 'addy':
-                info = fake.street_address()
-            case 'city':
-                info = random_city
-            case 'zip':
-                info = CITIES_TO_ZIP_CODES[random_city]
-            case 'job':
-                info = fake.job()
-            case 'salary':
-                info = random.randint(15, 35)
+        if key == 'resume':
+            driver.find_element_by_xpath(UPLOAD_A_RESUME_BUTTON).click()
+            info = os.getcwd() + '/'+resume_filename+'.png'
+        elif key == 'addy':
+            info = fake.street_address()
+        elif key == 'city':
+            info = random_city
+        elif key == 'zip':
+            info = CITIES_TO_ZIP_CODES[random_city]
+        elif key == 'job':
+            info = fake.job()
+        elif key == 'salary':
+            info = random.randint(15, 35)
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
 
-    print(f"successfully filled out app forms for {random_city}")
+    printf(f"successfully filled out app forms for {random_city}")
 
     # fill out dropdowns
     select = Select(driver.find_element_by_id(CITIZEN_QUESTION_LABEL))
@@ -227,7 +227,7 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
 
     time.sleep(5)
     driver.find_element_by_xpath(APPLY_BUTTON).click()
-    print(f"successfully submitted application")
+    printf(f"successfully submitted application")
 
     # take out the trash
     os.remove(resume_filename+'.pdf')
@@ -260,7 +260,7 @@ def main():
         try:
             driver = start_driver(random_city)
         except Exception as e:
-            print(f"FAILED TO START DRIVER: {e}")
+            printf(f"FAILED TO START DRIVER: {e}")
             pass
 
         time.sleep(2)
@@ -278,13 +278,13 @@ def main():
         try:
             generate_account(driver, fake_identity)
         except Exception as e:
-            print(f"FAILED TO CREATE ACCOUNT: {e}")
+            printf(f"FAILED TO CREATE ACCOUNT: {e}")
             pass
 
         try:
             fill_out_application_and_submit(driver, random_city, fake_identity)
         except Exception as e:
-            print(f"FAILED TO FILL OUT APPLICATION AND SUBMIT: {e}")
+            printf(f"FAILED TO FILL OUT APPLICATION AND SUBMIT: {e}")
             pass
             driver.close()
             continue
