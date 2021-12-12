@@ -1,1 +1,12 @@
+*.pyc
+*.pyo
+.DS_Store
+.Rhistory
+chromedriver
 chromedriver/
+.DS_Store
+chromedriver
+chromedriver.*
+__pycache__/
+captcha_audio.*
+*-Resume.*
