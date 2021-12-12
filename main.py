@@ -164,6 +164,7 @@ def generate_account(driver, fake_identity):
 
 def fill_out_application_and_submit(driver, random_city, fake_identity):
     # make resume
+    info = ''
     resume_filename = fake_identity['last_name']+'-Resume'
     make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], resume_filename+'.pdf')
     images = convert_from_path(resume_filename+'.pdf')
