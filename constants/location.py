@@ -1,8 +1,9 @@
-CITIES_TO_STATES = {'Lancaster': 'Pennsylvania',
-                    'Omaha': 'Nebraska',
-                    'Battle Creek': 'Michigan',
-                    'Memphis': 'Tennessee',
-                    }
+CITIES_TO_STATES = {
+    'Lancaster': 'Pennsylvania',
+    'Omaha': 'Nebraska',
+    'Battle Creek': 'Michigan',
+    'Memphis': 'Tennessee',
+}
 
 CITIES_TO_ZIP_CODES = {
     'Lancaster': ['17573', '17601', '17602', '17605', '17606', '17699'],
