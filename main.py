@@ -190,7 +190,8 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
             case 'job':
                 info = fake.job()
             case 'salary':
-                info = random.randint(15, 35)
+                first = random.randrange(15, 30, 5)
+                info = f'{first}-{random.randrange(first + 5, 35, 5)}'
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
         if key == 'resume': time.sleep(8) # wait for "loading" animation
