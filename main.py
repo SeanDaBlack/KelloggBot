@@ -143,7 +143,7 @@ def generate_account(driver, fake_identity):
             case 'last_name':
                 info = fake_identity['last_name']
             case 'pn':
-                info = fake.phone_number()
+                info = fake_identity['phone']
 
         driver.find_element_by_xpath(XPATHS_2.get(key)).send_keys(info)
 
@@ -157,7 +157,13 @@ def generate_account(driver, fake_identity):
     time.sleep(1.5)
     driver.find_element_by_xpath(ACCEPT_BUTTON).click()
     time.sleep(2)
-    solveCaptcha(driver)
+    
+    # it's gone??
+    try:
+        solveCaptcha(driver)
+    except Exception as e:
+        print('Error solving reCaptcha: '+str(e))
+
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
 
@@ -169,7 +175,7 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
 
     # make resume
     resume_filename = fake_identity['last_name']+'-Resume'
-    make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], resume_filename+'.pdf')
+    make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], fake_identity['phone'], resume_filename)
 
     # fill out form parts of app
     driver.find_element_by_xpath(PROFILE_INFORMATION_DROPDOWN).click()
@@ -304,11 +310,13 @@ def main():
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
         fake_email = random_email(fake_first_name+' '+fake_last_name)
+        fake_phone = fake.phone_number()
 
         fake_identity = {
             'first_name': fake_first_name,
             'last_name': fake_last_name,
-            'email': fake_email
+            'email': fake_email,
+            'phone': fake_phone
         }
 
         try:

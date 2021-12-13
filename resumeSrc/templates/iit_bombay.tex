@@ -1,0 +1,98 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[top=0.75in, bottom=0.2in, left=0.35in, right=0.35in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{palatino}
+\usepackage{tabularx}
+\fontfamily{SansSerif}
+\selectfont
+
+\usepackage[T1]{fontenc}
+\usepackage
+%[ansinew]
+[utf8]
+{inputenc}
+
+\usepackage{color}
+\definecolor{mygrey}{gray}{0.82}
+\textheight=9.75in
+\raggedbottom
+
+\setlength{\tabcolsep}{0in}
+\newcommand{\isep}{-2 pt}
+\newcommand{\lsep}{-0.5cm}
+\newcommand{\psep}{-0.6cm}
+\renewcommand{\labelitemii}{$\circ$}
+
+\pagestyle{empty}
+%-----------------------------------------------------------
+%Custom commands
+\newcommand{\resitem}[1]{\item #1 \vspace{-2pt}}
+\newcommand{\resheading}[1]{{\small \colorbox{mygrey}{\begin{minipage}{0.99\textwidth}{\textbf{#1 \vphantom{p\^{E}}}}\end{minipage}}}}
+\newcommand{\ressubheading}[3]{
+\begin{tabular*}{6.62in}{l @{\extracolsep{\fill}} r}
+	\textsc{{\textbf{#1}}} & \textsc{\textit{[#2]}} \\
+\end{tabular*}\vspace{-8pt}}
+%-----------------------------------------------------------
+
+\begin{document}
+% Blank white space for the header to be added by placement team
+%   \hspace{0.1em}\\ % also use up a newline
+%   \vspace{2.7cm}\\ % the remaining free space.
+
+% Dummy header is written here, just for example  in between the tags:  \iffalse and \fi .. 
+% \iffalse 
+
+\noindent
+\begin{minipage}{4in}
+\textbf{\Huge \scshape @@NAME@@} 
+\end{minipage}
+\hfill
+\begin{minipage}{2in}
+\begin{flushright}
+@@PHONE@@ \\
+@@EMAIL@@
+\end{flushright}
+\end{minipage}
+\vspace{8pt}
+
+\noindent \resheading{\textbf{EDUCATION}}\\[-0.3cm]
+\begin{itemize}[noitemsep,nolistsep,label={}]
+\item \textbf{@@UNIVERSITY@@} \\
+\emph{@@DEGREE@@} \hfill \emph{(@@ENROLLYEAR@@ - @@GRADYEAR@@)}\\[0.1cm]
+\end{itemize}
+
+\noindent
+\resheading{\textbf{EXPERIENCE}}\\[-0.3cm]
+\begin{itemize}[noitemsep,nolistsep]
+    \item \textbf{@@JOB@@} | \textbf{\emph{@@COMPANY@@}}\hfill \emph{(@@MIDDLEYEAR@@ - @@THISYEAR@@)}\\[-0.6cm]
+    \begin{itemize}[noitemsep]
+        \item @@WORDS@@
+        \item @@WORDS@@
+        \item @@WORDS@@
+        \item @@WORDS@@
+        \item @@WORDS@@\\[-0.5cm]
+    \end{itemize}
+    \item \textbf{@@JOB@@} | \textbf{\emph{@@COMPANY@@}}\hfill \emph{(@@GRADYEAR@@ - @@MIDDLEYEAR@@)}\\[-0.6cm]
+    \begin{itemize}[noitemsep]
+        \item @@WORDS@@
+        \item @@WORDS@@
+        \item @@WORDS@@
+        \item @@WORDS@@\\[0.1cm]
+    \end{itemize}
+\end{itemize}
+
+\noindent
+\resheading{\textbf{SKILLS}}\\[-0.4cm]
+ \begin{itemize}
+  \item @@WORDS@@\\[-0.6cm]
+  \item @@WORDS@@\\[-0.6cm]
+  \item @@WORDS@@\\[-0.6cm]
+  \item @@WORDS@@\\[-0.6cm]
+  \item @@WORDS@@\\[-0.6cm]
+\end{itemize}
+
+\end{document}
