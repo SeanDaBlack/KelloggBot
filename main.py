@@ -194,7 +194,7 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
                 info = random.randint(15, 35)
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
-        if key == 'resume': time.sleep(9) # wait for "loading" animation
+        if key == 'resume': time.sleep(8) # wait for "loading" animation
 
     print(f"successfully filled out app forms for {random_city}")
 
@@ -237,12 +237,12 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
     except Exception as e:
         print(e)
         print('There may be unfilled items. Stop script and complete the application manually or wait to abort')
+        time.sleep(5)
 
     print(f"successfully submitted application")
 
     # take out the trash
     os.remove(resume_filename+'.pdf')
-    os.remove(resume_filename+'.png')
 
 def random_email(name=None):
     if name is None:
