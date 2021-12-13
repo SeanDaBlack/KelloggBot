@@ -7,6 +7,8 @@ import subprocess
 
 fake = Faker()
 
+silent = False
+
 ROOT_FOLDER = './resumeSrc/'
 TEMPLATES_FOLDER = ROOT_FOLDER+'templates/'
 PACKAGES_FOLDER = ROOT_FOLDER+'packages/'
@@ -2089,11 +2091,13 @@ def make_resume(name, email, phone, filename='resume'):
     grad_year = random.randrange(1990,year-10)
     midyear = int(grad_year + (year-grad_year)*0.1*random.randrange(3,7))
 
-    template = random.choice([file for file in os.listdir(TEMPLATES_FOLDER) if file.endswith('.tex')])
+    #template = random.choice([file for file in os.listdir(TEMPLATES_FOLDER) if file.endswith('.tex')])
+    template = 'stylish.tex'
 
-    with open(TEMPLATES_FOLDER+'/'+template) as input, open(ROOT_FOLDER+filename+'.tex', 'a') as output:
+    with open(TEMPLATES_FOLDER+template) as input, open(PACKAGES_FOLDER+filename+'.tex', 'a') as output:
         for line in input.readlines():
             line = re.sub('@@WORDS@@', fake.sentence(6)[:-1], line)
+            line = re.sub('@@PARAGRAPH@@', fake.paragraph(6), line)
             line = re.sub('@@BS@@', fake.bs(), line)
 
             line = re.sub('@@NAME@@', name, line)
@@ -2114,11 +2118,17 @@ def make_resume(name, email, phone, filename='resume'):
 
             output.write(line)
 
-    subprocess.call(['pdflatex','../'+filename+'.tex'], cwd=PACKAGES_FOLDER)
+    subprocess.call(
+        ['pdflatex',filename+'.tex'], 
+        cwd=PACKAGES_FOLDER, 
+        stderr = subprocess.DEVNULL if silent else None, 
+        stdout = subprocess.DEVNULL if silent else None
+    )
     os.rename(PACKAGES_FOLDER+filename+'.pdf','./'+filename+'.pdf')
-    os.remove(ROOT_FOLDER+filename+'.tex')
-    os.remove(PACKAGES_FOLDER+filename+'.aux')
-    os.remove(PACKAGES_FOLDER+filename+'.log')
-    os.remove(PACKAGES_FOLDER+filename+'.out')
+    for ext in ['tex','aux','log','out']:
+        try:
+            os.remove(PACKAGES_FOLDER+filename+'.'+ext)
+        except Exception:
+            continue
 
 make_resume(fake.name(), fake.free_email(), fake.phone_number())
