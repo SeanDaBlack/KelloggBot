@@ -25,6 +25,7 @@ from constants.email import *
 from constants.location import *
 from constants.urls import *
 from constants.xPaths import *
+from constants.educationinfo import *
 
 os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
 
@@ -115,7 +116,10 @@ def solveCaptcha(driver):
     driver.switch_to.default_content()
 
 def start_driver(random_city):
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    options = webdriver.ChromeOptions()
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    options.add_argument('--incognito')
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     time.sleep(2)
@@ -180,43 +184,44 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
         match key:
             case 'resume':
                 driver.find_element_by_xpath(UPLOAD_A_RESUME_BUTTON).click()
-                info = os.getcwd() + '/'+resume_filename+'.png'
+                info = os.getcwd() + '/'+resume_filename+'.pdf'
             case 'addy':
                 info = fake.street_address()
             case 'city':
                 info = random_city
             case 'zip':
-                info = CITIES_TO_ZIP_CODES[random_city]
+                info = CITIES_TO_ZIP_CODES[random_city][random.randint(0,5)]
             case 'job':
                 info = fake.job()
             case 'salary':
                 info = random.randint(15, 35)
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
+        if key == 'resume': time.sleep(9) # wait for "loading" animation
 
     print(f"successfully filled out app forms for {random_city}")
 
     # fill out dropdowns
-    select = Select(driver.find_element_by_id(CITIZEN_QUESTION_LABEL))
+    select = Select(driver.find_element_by_name(CITIZEN_QUESTION_LABEL))
     select.select_by_visible_text(YES)
-    select = Select(driver.find_element_by_id(COUNTRY_OF_ORIGIN_LABEL))
+    select = Select(driver.find_element_by_name(COUNTRY_OF_ORIGIN_LABEL))
     select.select_by_visible_text(FULL_NAME_US)
-    select = Select(driver.find_element_by_id(EIGHTEEN_YEARS_OLD_LABEL))
+    select = Select(driver.find_element_by_name(EIGHTEEN_YEARS_OLD_LABEL))
     select.select_by_visible_text(YES)
-    select = Select(driver.find_element_by_id(REQUIRE_SPONSORSHIP_LABEL))
+    select = Select(driver.find_element_by_name(REQUIRE_SPONSORSHIP_LABEL))
     select.select_by_visible_text(NO)
-    select = Select(driver.find_element_by_id(PREVIOUSLY_WORKED_LABEL))
+    select = Select(driver.find_element_by_name(PREVIOUSLY_WORKED_LABEL))
     select.select_by_visible_text(NO)
-    select = Select(driver.find_element_by_id(PREVIOUSLY_PARTNERED_LABEL))
+    select = Select(driver.find_element_by_name(PREVIOUSLY_PARTNERED_LABEL))
     select.select_by_visible_text(NO)
-    select = Select(driver.find_element_by_id(RELATIVE_WORKER_LABEL))
+    select = Select(driver.find_element_by_name(RELATIVE_WORKER_LABEL))
     select.select_by_visible_text(NO)
-    select = Select(driver.find_element_by_id(ESSENTIAL_FUNCTIONS_LABEL))
+    select = Select(driver.find_element_by_name(ESSENTIAL_FUNCTIONS_LABEL))
     select.select_by_visible_text(YES)
-    select = Select(driver.find_element_by_id(PREVIOUSLY_PARTNERED_LABEL))
+    select = Select(driver.find_element_by_name(PREVIOUSLY_PARTNERED_LABEL))
     select.select_by_visible_text(NO)
     time.sleep(1)
-    select = Select(driver.find_element_by_id(GENDER_LABEL))
+    select = Select(driver.find_element_by_name(GENDER_LABEL))
     gender = random.choice(GENDERS_LIST)
     select.select_by_visible_text(gender)
     driver.find_element_by_xpath(MIXER_QUESTION_1_LABEL).click()
@@ -225,8 +230,17 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
     els = driver.find_elements_by_xpath(LONG_PERIODS_QUESTION_LABEL)
     [el.click() for el in els]
 
-    time.sleep(5)
+    fill_out_education_info(driver)
+
+    time.sleep(3)
     driver.find_element_by_xpath(APPLY_BUTTON).click()
+    time.sleep(3)
+    try:
+        driver.find_element_by_xpath('//*[@class="rcmSuccessBackToResultsBtn"]')
+    except Exception as e:
+        print(e)
+        print('There may be unfilled items. Stop script and complete the application manually or wait to abort')
+
     print(f"successfully submitted application")
 
     # take out the trash
@@ -252,6 +266,19 @@ def random_email(name=None):
 
     return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
            random.choices(EMAIL_DATA, emailChoices)[0][1]
+
+
+def fill_out_education_info(driver):
+    try:
+        driver.find_element_by_xpath(DEGREE_COMPLETION_LABEL + '/option[text()="' + random.choice(GRADUATION_STATUS) + '"]').click()
+        driver.find_element_by_xpath(DEGREE_MAJOR_LABEL + '/option[text()="' + random.choice(DEGREE_MAJORS) + '"]').click()
+        driver.find_element_by_xpath(DEGREE_TYPE_LABEL + '/option[text()="' + random.choice(DEGREE_TYPES) + '"]').click()
+        print('successfully filled out degree information')
+    except Exception as e:
+        print(e)
+        print('Education info probably not required')
+    time.sleep(2)
+
 
 
 def main():
