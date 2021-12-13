@@ -25,5 +25,5 @@ AUDIO_RESPONSE = 'audio-response'
 STATE_LABEL = 'state'
 PRESENT_EMPLOYEE = 'presentEmployer'
 
-# Outside Work Experience (Not yet implemented)
-INDUSTRY_LABEL = 'VFLD2'  # possibly 2 with same name if multiple past jobs are initialized
+# Outside Work Experience
+INDUSTRY_LABEL = 'VFLD2'
