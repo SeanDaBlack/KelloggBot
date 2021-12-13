@@ -139,13 +139,13 @@ def start_driver(random_city):
         options.add_argument(f"user-agent={USER_AGENT}")
         options.add_argument('disable-blink-features=AutomationControlled')
         options.headless = True
-        driver = webdriver.Chrome(ChromeDriverManager().install(),options=options)
+        driver = webdriver.Chrome(options=options)
         driver.set_window_size(1440, 900)
     elif (args.debug == DEBUG_ENABLED):
-        driver = webdriver.Chrome(ChromeDriverManager().install())
+        driver = webdriver.Chrome()
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
-    time.sleep(2)
+    WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, CREATE_AN_ACCOUNT_BUTTON)))
     driver.find_element_by_xpath(APPLY_NOW_BUTTON_1).click()
     driver.find_element_by_xpath(APPLY_NOW_BUTTON_2).click()
     driver.find_element_by_xpath(CREATE_AN_ACCOUNT_BUTTON).click()
@@ -160,9 +160,9 @@ def generate_account(driver, fake_identity):
     password = fake.password()
 
     for key in XPATHS_2.keys():
-        if key[:5] == 'email':
+        if key in ('email', 'email-retype'):
             info = fake_identity['email']
-        elif key[:4] == 'pass':
+        elif key in ('pass', 'pass-retype'):
             info = password
         elif key == 'first_name':
             info = fake_identity['first_name']
