@@ -10,4 +10,3 @@ fpdf==1.7.2
 pdf2image==1.16.0
 SpeechRecognition==3.8.1
 pydub==0.25.1
-undetected-chromedriver==3.0.6
