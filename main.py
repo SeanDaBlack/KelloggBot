@@ -6,7 +6,6 @@ import re
 import sys
 import time
 import argparse
-from json import loads
 from selenium.webdriver.chrome import options
 
 from faker import Faker
@@ -100,10 +99,10 @@ def generate_account(driver, fake_identity):
     time.sleep(1.5)
     while True:
         time.sleep(1.5)
-        mail = loads(requests.get(f'https://api.guerrillamail.com/ajax.php?f=check_email&seq=1&sid_token={fake_identity.get("sid")}').text)
+        mail = requests.get(f'https://api.guerrillamail.com/ajax.php?f=check_email&seq=1&sid_token={fake_identity.get("sid")}').json()
         mail_list = mail.get('list')
         if mail_list:
-            mail_body = loads(requests.get(f'https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail.get("list")[0].get("mail_id")}&sid_token={fake_identity.get("sid")}')).get('mail_body')
+            mail_body = requests.get(f'https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail.get("list")[0].get("mail_id")}&sid_token={fake_identity.get("sid")}').json().get('mail_body')
             passcode = re.findall('(?<=n is ).*?(?=<)', mail_body)[0]
             driver.find_element_by_xpath(VERIFY_EMAIL_INPUT).send_keys(passcode)
             driver.find_element_by_xpath(VERIFY_EMAIL_BUTTON).click()
@@ -198,7 +197,7 @@ def main():
 
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
-        guerrilla_response = loads(requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').text)
+        guerrilla_response = requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').json()
 
         fake_email = guerrilla_response.get('email_addr')
         guerrilla_sid = guerrilla_response.get('sid_token')
