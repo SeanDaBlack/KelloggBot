@@ -1545,7 +1545,7 @@ def make_resume(name, email, path = 'output.pdf'):
         'Oklahoma City University',
         'Oklahoma State University',
         'Oral Roberts University',
-        'Oklahoma State University Institue of Technology',
+        'Oklahoma State University Institute of Technology',
         'Oklahoma State University',
         'The University of Oklahoma',
         'The University of Oklahoma Health Sciences Center',
