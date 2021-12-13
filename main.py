@@ -24,7 +24,6 @@ from constants.email import *
 from constants.location import *
 from constants.urls import *
 from constants.xPaths import *
-from constants.educationinfo import *
 
 os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
 
@@ -223,26 +222,31 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
     select.select_by_visible_text(gender)
     driver.find_element_by_xpath(MIXER_QUESTION_1_LABEL).click()
     driver.find_element_by_xpath(MIXER_QUESTION_2_LABEL).click()
+    driver.find_element_by_xpath('//select[@name="' + STATE_LABEL + '"]/option[text()="' + CITIES_TO_STATES[random_city] + '"]').click()
+    driver.find_element_by_xpath('//select[@name="' + PRESENT_EMPLOYEE + '"]/option[text()="' + random.choice([YES, NO]) + '"]').click()
+    driver.find_element_by_xpath('//select[@name="' + REFERRAL_LABEL + '"]/option[text()="' + random.choice(REFERRAL_LIST) + '"]').click()
+    driver.find_element_by_xpath('//select[@name="' + ETHNICITY_LABEL + '"]/option[text()="' + random.choice(ETHNICITY_LIST) + '"]').click()
 
     els = driver.find_elements_by_xpath(LONG_PERIODS_QUESTION_LABEL)
     [el.click() for el in els]
 
     fill_out_education_info(driver)
+    fill_out_work_history(driver)
 
     time.sleep(3)
     driver.find_element_by_xpath(APPLY_BUTTON).click()
     time.sleep(3)
     try:
         driver.find_element_by_xpath('//*[@class="rcmSuccessBackToResultsBtn"]')
+        print(f"successfully submitted application")
     except Exception as e:
         print(e)
         print('There may be unfilled items. Stop script and complete the application manually or wait to abort')
         time.sleep(5)
 
-    print(f"successfully submitted application")
-
     # take out the trash
     os.remove(resume_filename+'.pdf')
+
 
 def random_email(name=None):
     if name is None:
@@ -272,10 +276,17 @@ def fill_out_education_info(driver):
         driver.find_element_by_xpath(DEGREE_TYPE_LABEL + '/option[text()="' + random.choice(DEGREE_TYPES) + '"]').click()
         print('successfully filled out degree information')
     except Exception as e:
-        print(e)
-        print('Education info probably not required')
+        print(f'Education info probably not required: {e}')
     time.sleep(2)
 
+
+def fill_out_work_history(driver):
+    for i in range(2):
+        try:
+            driver.find_element_by_xpath('(//select[@name="' + INDUSTRY_LABEL + '"]/option[text()="' + random.choice(INDUSTRY_LIST) + '"])[' + str(i+1) + ']').click()
+        except Exception as e:
+            print(f'Probably no work experience section: {e}')
+            pass
 
 
 def main():

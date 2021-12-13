@@ -32,7 +32,7 @@ MIXER_QUESTION_2_LABEL = '//label[text()="800 LBS"]'
 LONG_PERIODS_QUESTION_LABEL = '//label[text()="Yes"]'
 APPLY_BUTTON = '//span[text()="Apply"]'
 
-# use 'select' instead of * for dropdown items
+# Education Info (using 'select' instead of * for dropdown items)
 DEGREE_COMPLETION_LABEL = '//select[@name="VFLD4"]'
 DEGREE_MAJOR_LABEL =  '//select[@name="VFLD2"]'
 DEGREE_TYPE_LABEL =  '//select[@name="VFLD3"]'
