@@ -220,7 +220,8 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
         elif key == 'job':
             info = fake.job()
         elif key == 'salary':
-            info = random.randint(15, 35)
+            first = random.randrange(15, 30, 5)
+            info = f'{first}-{random.randrange(first + 5, 35, 5)}'
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
 
