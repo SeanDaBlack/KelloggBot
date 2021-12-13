@@ -3,9 +3,11 @@ import functools
 import os
 import subprocess
 import random
+import re
 import sys
 import time
 import argparse
+from json import loads
 from selenium.webdriver.chrome import options
 
 import speech_recognition as sr
@@ -26,7 +28,6 @@ from constants.common import *
 from constants.fileNames import *
 from constants.classNames import *
 from constants.elementIds import *
-from constants.email import *
 from constants.location import *
 from constants.parser import *
 from constants.urls import *
@@ -187,6 +188,16 @@ def generate_account(driver, fake_identity):
     time.sleep(2)
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
+    while True:
+        time.sleep(1.5)
+        mail = loads(requests.get(f'https://api.guerrillamail.com/ajax.php?f=check_email&seq=1&sid_token={fake_identity.get("sid")}').text)
+        mail_list = mail.get('list')
+        if mail_list:
+            mail_body = loads(requests.get(f'https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail.get("list")[0].get("mail_id")}&sid_token={fake_identity.get("sid")}')).get('mail_body')
+            passcode = re.findall('(?<=n is ).*?(?=<)', mail_body)[0]
+            driver.find_element_by_xpath(VERIFY_EMAIL_INPUT).send_keys(passcode)
+            driver.find_element_by_xpath(VERIFY_EMAIL_BUTTON).click()
+            break
 
     printf(f"successfully made account for fake email {email}")
 
@@ -264,27 +275,6 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
     os.remove(resume_filename+'.pdf')
     os.remove(resume_filename+'.png')
 
-def random_email(name=None):
-    if name is None:
-        name = fake.name()
-
-    mailGens = [lambda fn, ln, *names: fn + ln,
-                lambda fn, ln, *names: fn + "." + ln,
-                lambda fn, ln, *names: fn + "_" + ln,
-                lambda fn, ln, *names: fn[0] + "." + ln,
-                lambda fn, ln, *names: fn[0] + "_" + ln,
-                lambda fn, ln, *names: fn + ln + str(int(1 / random.random() ** 3)),
-                lambda fn, ln, *names: fn + "." + ln + str(int(1 / random.random() ** 3)),
-                lambda fn, ln, *names: fn + "_" + ln + str(int(1 / random.random() ** 3)),
-                lambda fn, ln, *names: fn[0] + "." + ln + str(int(1 / random.random() ** 3)),
-                lambda fn, ln, *names: fn[0] + "_" + ln + str(int(1 / random.random() ** 3)), ]
-
-    emailChoices = [float(line[2]) for line in EMAIL_DATA]
-
-    return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
-           random.choices(EMAIL_DATA, emailChoices)[0][1]
-
-
 def main():
     while True:
         random_city = random.choice(list(CITIES_TO_URLS.keys()))
@@ -298,12 +288,16 @@ def main():
 
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
-        fake_email = random_email(fake_first_name+' '+fake_last_name)
+        guerrilla_response = loads(requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').text)
+
+        fake_email = guerrilla_response.get('email_addr')
+        guerrilla_sid = guerrilla_response.get('sid_token')
 
         fake_identity = {
             'first_name': fake_first_name,
             'last_name': fake_last_name,
             'email': fake_email
+            'sid' : guerrilla_sid
         }
 
         try:
