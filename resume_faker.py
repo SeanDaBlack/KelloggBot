@@ -3,10 +3,13 @@ from faker import Faker
 from datetime import date
 import re
 import os
+import subprocess
 
 fake = Faker()
 
-TEMPLATES_FOLDER = './resumeTemplates'
+ROOT_FOLDER = './resumeSrc/'
+TEMPLATES_FOLDER = ROOT_FOLDER+'templates/'
+PACKAGES_FOLDER = ROOT_FOLDER+'packages/'
 
 DEGREES = [
     'Bachelor of Science in Genetic Engineering and Biotechnology',
@@ -2088,7 +2091,7 @@ def make_resume(name, email, phone, filename='resume'):
 
     template = random.choice([file for file in os.listdir(TEMPLATES_FOLDER) if file.endswith('.tex')])
 
-    with open(TEMPLATES_FOLDER+'/'+template) as input, open(filename+'.tex', 'a') as output:
+    with open(TEMPLATES_FOLDER+'/'+template) as input, open(ROOT_FOLDER+filename+'.tex', 'a') as output:
         for line in input.readlines():
             line = re.sub('@@WORDS@@', fake.sentence(6)[:-1], line)
             line = re.sub('@@BS@@', fake.bs(), line)
@@ -2111,10 +2114,11 @@ def make_resume(name, email, phone, filename='resume'):
 
             output.write(line)
 
-    os.system('pdflatex '+filename+'.tex >/dev/null')
-    os.remove(filename+'.tex')
-    os.remove(filename+'.aux')
-    os.remove(filename+'.log')
-    os.remove(filename+'.out')
+    subprocess.call(['pdflatex','../'+filename+'.tex'], cwd=PACKAGES_FOLDER)
+    os.rename(PACKAGES_FOLDER+filename+'.pdf','./'+filename+'.pdf')
+    os.remove(ROOT_FOLDER+filename+'.tex')
+    os.remove(PACKAGES_FOLDER+filename+'.aux')
+    os.remove(PACKAGES_FOLDER+filename+'.log')
+    os.remove(PACKAGES_FOLDER+filename+'.out')
 
 make_resume(fake.name(), fake.free_email(), fake.phone_number())
