@@ -24,6 +24,8 @@ CREATE_AN_ACCOUNT_BUTTON = '//*[@id="page_content"]/div[2]/div/div/div[2]/div/di
 READ_ACCEPT_DATA_PRIVACY_STATEMENT_ANCHORTAG = '//*[@id="dataPrivacyId"]'
 ACCEPT_BUTTON = '//*[@id="dlgButton_20:"]'
 CREATE_ACCOUNT_BUTTON = '//*[@id="fbclc_createAccountButton"]'
+VERIFY_EMAIL_INPUT = '//*[@id="passcode"]'
+VERIFY_EMAIL_BUTTON = '//*[@id="continueBtn"]'
 PROFILE_INFORMATION_DROPDOWN = '//*[@id="109:topBar"]'
 CANDIDATE_SPECIFIC_INFORMATION_DROPDOWN = '//*[@id="260:topBar"]'
 UPLOAD_A_RESUME_BUTTON = '//*[@id="48:_attach"]/div[6]'
