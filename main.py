@@ -25,6 +25,7 @@ from constants.common import *
 from constants.fileNames import *
 from constants.classNames import *
 from constants.elementIds import *
+from constants.email import *
 from constants.location import *
 from constants.parser import *
 from constants.urls import *
@@ -41,9 +42,9 @@ printf = functools.partial(print, flush=True)
 #Option parsing
 parser = argparse.ArgumentParser(SCRIPT_DESCRIPTION,epilog=EPILOG)
 parser.add_argument('--debug',action='store_true',default=DEBUG_DISABLED,required=False,help=DEBUG_DESCRIPTION,dest='debug')
+parser.add_argument('--mailtm',action='store_true',default=MAILTM_DISABLED,required=False,help=MAILTM_DESCRIPTION,dest='mailtm')
 args = parser.parse_args()
 # END TEST
-
 
 def start_driver(random_city):
     options = Options()
@@ -67,7 +68,6 @@ def start_driver(random_city):
 def generate_account(driver, fake_identity):
     # make fake account info and fill
 
-    info = ''
     email = fake.free_email()
     password = fake.password()
 
@@ -97,23 +97,33 @@ def generate_account(driver, fake_identity):
     time.sleep(2)
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
-    while True:
+    for i in range(120):
         time.sleep(1.5)
-        mail = requests.get(f'https://api.guerrillamail.com/ajax.php?f=check_email&seq=1&sid_token={fake_identity.get("sid")}').json()
-        mail_list = mail.get('list')
-        if mail_list:
-            mail_body = requests.get(f'https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail.get("list")[0].get("mail_id")}&sid_token={fake_identity.get("sid")}').json().get('mail_body')
-            passcode = re.findall('(?<=n is ).*?(?=<)', mail_body)[0]
-            driver.find_element_by_xpath(VERIFY_EMAIL_INPUT).send_keys(passcode)
-            driver.find_element_by_xpath(VERIFY_EMAIL_BUTTON).click()
-            break
+        if (args.mailtm == MAILTM_DISABLED):
+            mail = requests.get(f'https://api.guerrillamail.com/ajax.php?f=check_email&seq=1&sid_token={fake_identity.get("sid")}').json().get('list')
+
+            if mail:
+                passcode = re.findall('(?<=n is ).*?(?=<)', requests.get(f'https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail[0].get("mail_id")}&sid_token={fake_identity.get("sid")}').json().get('mail_body'))[0]
+                break
+
+        elif (args.mailtm == MAILTM_ENABLED):
+            mail = requests.get("https://api.mail.tm/messages?page=1", headers={'Authorization':f'Bearer {fake_identity.get("sid")}'}).json().get('hydra:member')
+
+            if mail:
+                passcode = re.findall('(?<=n is ).*', requests.get(f'https://api.mail.tm{mail[0].get("@id")}', headers={'Authorization':f'Bearer {fake_identity.get("sid")}'}).json().get('text'))[0]
+                break
+    else:
+        args.mailtm ^= True
+        main() # I should probably find a better way to do this.
+
+    driver.find_element_by_xpath(VERIFY_EMAIL_INPUT).send_keys(passcode)
+    driver.find_element_by_xpath(VERIFY_EMAIL_BUTTON).click()
 
     printf(f"successfully made account for fake email {email}")
 
 
 def fill_out_application_and_submit(driver, random_city, fake_identity):
     # make resume
-    info = ''
     resume_filename = fake_identity['last_name']+'-Resume'
     make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], resume_filename+'.pdf')
     images = convert_from_path(resume_filename+'.pdf')
@@ -184,6 +194,20 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
     os.remove(resume_filename+'.pdf')
     os.remove(resume_filename+'.png')
 
+def random_email(name=None):
+    if name is None:
+        name = fake.name()
+
+    mailGens = [lambda fn, ln, *names: fn + ln,
+                lambda fn, ln, *names: fn + "_" + ln,
+                lambda fn, ln, *names: fn[0] + "_" + ln,
+                lambda fn, ln, *names: fn + ln + str(int(1 / random.random() ** 3)),
+                lambda fn, ln, *names: fn + "_" + ln + str(int(1 / random.random() ** 3)),
+                lambda fn, ln, *names: fn[0] + "_" + ln + str(int(1 / random.random() ** 3)), ]
+
+    return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
+           requests.get('https://api.mail.tm/domains').json().get('hydra:member')[0].get('domain')
+
 def main():
     while True:
         random_city = random.choice(list(CITIES_TO_URLS.keys()))
@@ -197,16 +221,21 @@ def main():
 
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
-        guerrilla_response = requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').json()
+        if (args.mailtm == MAILTM_DISABLED):
+            response = requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').json()
 
-        fake_email = guerrilla_response.get('email_addr')
-        guerrilla_sid = guerrilla_response.get('sid_token')
+            fake_email = response.get('email_addr')
+            mail_sid = response.get('sid_token')
+
+        elif (args.mailtm == MAILTM_ENABLED):
+            fake_email = requests.post('https://api.mail.tm/accounts', data='{"address":"'+random_email(fake_first_name+' '+fake_last_name)+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('address')
+            mail_sid = requests.post('https://api.mail.tm/token', data='{"address":"'+fake_email+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('token')
 
         fake_identity = {
             'first_name': fake_first_name,
             'last_name': fake_last_name,
             'email': fake_email
-            'sid' : guerrilla_sid
+            'sid' : mail_sid
         }
 
         try:
