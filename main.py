@@ -1,14 +1,13 @@
 import requests
 import functools
 import os
-import subprocess
 import random
+import re
 import sys
 import time
 import argparse
 from selenium.webdriver.chrome import options
 
-import speech_recognition as sr
 from faker import Faker
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -43,95 +42,9 @@ printf = functools.partial(print, flush=True)
 #Option parsing
 parser = argparse.ArgumentParser(SCRIPT_DESCRIPTION,epilog=EPILOG)
 parser.add_argument('--debug',action='store_true',default=DEBUG_DISABLED,required=False,help=DEBUG_DESCRIPTION,dest='debug')
+parser.add_argument('--mailtm',action='store_true',default=MAILTM_DISABLED,required=False,help=MAILTM_DESCRIPTION,dest='mailtm')
 args = parser.parse_args()
-
-r = sr.Recognizer()
-
-def audioToText(mp3Path):
-    # deletes old file
-    try:
-        os.remove(CAPTCHA_WAV_FILENAME)
-    except FileNotFoundError:
-        pass
-    # convert wav to mp3                                                            
-    subprocess.run(f"ffmpeg -i {mp3Path} {CAPTCHA_WAV_FILENAME}", shell=True, timeout=5)
-
-    with sr.AudioFile(CAPTCHA_WAV_FILENAME) as source:
-        audio_text = r.listen(source)
-        try:
-            text = r.recognize_google(audio_text)
-            printf('Converting audio transcripts into text ...')
-            return(text)     
-        except Exception as e:
-            printf(e)
-            printf('Sorry.. run again...')
-
-def saveFile(content,filename):
-    with open(filename, "wb") as handle:
-        for data in content.iter_content():
-            handle.write(data)
 # END TEST
-
-def solveCaptcha(driver):
-    # Logic to click through the reCaptcha to the Audio Challenge, download the challenge mp3 file, run it through the audioToText function, and send answer
-    googleClass = driver.find_elements_by_class_name(CAPTCHA_BOX)[0]
-    time.sleep(2)
-    outeriframe = googleClass.find_element_by_tag_name('iframe')
-    time.sleep(1)
-    outeriframe.click()
-    time.sleep(2)
-    allIframesLen = driver.find_elements_by_tag_name('iframe')
-    time.sleep(1)
-    audioBtnFound = False
-    audioBtnIndex = -1
-    for index in range(len(allIframesLen)):
-        driver.switch_to.default_content()
-        iframe = driver.find_elements_by_tag_name('iframe')[index]
-        driver.switch_to.frame(iframe)
-        driver.implicitly_wait(2)
-        try:
-            audioBtn = driver.find_element_by_id(RECAPTCHA_AUDIO_BUTTON) or driver.find_element_by_id(RECAPTCHA_ANCHOR)
-            audioBtn.click()
-            audioBtnFound = True
-            audioBtnIndex = index
-            break
-        except Exception as e:
-            pass
-    if audioBtnFound:
-        try:
-            while True:
-                """
-                try:
-                    time.sleep(3)
-                    WebDriverWait(driver, 20).until(expected_conditions.presence_of_element_located((By.ID, AUDIO_SOURCE)))
-                except Exception as e:
-                    print(f"Waiting broke lmao {e}")
-                """
-                driver.implicitly_wait(10)
-                href = driver.find_element_by_id(AUDIO_SOURCE).get_attribute('src')
-                response = requests.get(href, stream=True)
-                saveFile(response, CAPTCHA_MP3_FILENAME)
-                response = audioToText(CAPTCHA_MP3_FILENAME)
-                printf(response)
-                driver.switch_to.default_content()
-                iframe = driver.find_elements_by_tag_name('iframe')[audioBtnIndex]
-                driver.switch_to.frame(iframe)
-                inputbtn = driver.find_element_by_id(AUDIO_RESPONSE)
-                inputbtn.send_keys(response)
-                inputbtn.send_keys(Keys.ENTER)
-                time.sleep(2)
-                errorMsg = driver.find_elements_by_class_name(AUDIO_ERROR_MESSAGE)[0]
-                if errorMsg.text == "" or errorMsg.value_of_css_property('display') == 'none':
-                    printf("reCaptcha defeated!")
-                    break
-        except Exception as e:
-            printf(e)
-            printf('Oops, something happened. Check above this message for errors or check the chrome window to see if captcha locked you out...')
-    else:
-        printf('Button not found. This should not happen.')
-
-    time.sleep(2)
-    driver.switch_to.default_content()
 
 def start_driver(random_city):
     options = Options()
@@ -155,7 +68,6 @@ def start_driver(random_city):
 def generate_account(driver, fake_identity):
     # make fake account info and fill
 
-    info = ''
     email = fake.free_email()
     password = fake.password()
 
@@ -183,17 +95,35 @@ def generate_account(driver, fake_identity):
     time.sleep(1.5)
     driver.find_element_by_xpath(ACCEPT_BUTTON).click()
     time.sleep(2)
-    solveCaptcha(driver)
-    time.sleep(2)
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
+    for i in range(120):
+        time.sleep(1.5)
+        if (args.mailtm == MAILTM_DISABLED):
+            mail = requests.get(f'https://api.guerrillamail.com/ajax.php?f=check_email&seq=1&sid_token={fake_identity.get("sid")}').json().get('list')
+
+            if mail:
+                passcode = re.findall('(?<=n is ).*?(?=<)', requests.get(f'https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail[0].get("mail_id")}&sid_token={fake_identity.get("sid")}').json().get('mail_body'))[0]
+                break
+
+        elif (args.mailtm == MAILTM_ENABLED):
+            mail = requests.get("https://api.mail.tm/messages?page=1", headers={'Authorization':f'Bearer {fake_identity.get("sid")}'}).json().get('hydra:member')
+
+            if mail:
+                passcode = re.findall('(?<=n is ).*', requests.get(f'https://api.mail.tm{mail[0].get("@id")}', headers={'Authorization':f'Bearer {fake_identity.get("sid")}'}).json().get('text'))[0]
+                break
+    else:
+        args.mailtm ^= True
+        main() # I should probably find a better way to do this.
+
+    driver.find_element_by_xpath(VERIFY_EMAIL_INPUT).send_keys(passcode)
+    driver.find_element_by_xpath(VERIFY_EMAIL_BUTTON).click()
 
     printf(f"successfully made account for fake email {email}")
 
 
 def fill_out_application_and_submit(driver, random_city, fake_identity):
     # make resume
-    info = ''
     resume_filename = fake_identity['last_name']+'-Resume'
     make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], resume_filename+'.pdf')
     images = convert_from_path(resume_filename+'.pdf')
@@ -220,8 +150,8 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
         elif key == 'job':
             info = fake.job()
         elif key == 'salary':
-            first = random.randrange(15, 30, 5)
-            info = f'{first}-{random.randrange(first + 5, 35, 5)}'
+            first = random.randrange(15000, 30000, 5000)
+            info = f'{format(first, ",")}-{format(random.randrange(first + 5000, 35000, 5000), ",")}'
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
 
@@ -269,21 +199,14 @@ def random_email(name=None):
         name = fake.name()
 
     mailGens = [lambda fn, ln, *names: fn + ln,
-                lambda fn, ln, *names: fn + "." + ln,
                 lambda fn, ln, *names: fn + "_" + ln,
-                lambda fn, ln, *names: fn[0] + "." + ln,
                 lambda fn, ln, *names: fn[0] + "_" + ln,
                 lambda fn, ln, *names: fn + ln + str(int(1 / random.random() ** 3)),
-                lambda fn, ln, *names: fn + "." + ln + str(int(1 / random.random() ** 3)),
                 lambda fn, ln, *names: fn + "_" + ln + str(int(1 / random.random() ** 3)),
-                lambda fn, ln, *names: fn[0] + "." + ln + str(int(1 / random.random() ** 3)),
                 lambda fn, ln, *names: fn[0] + "_" + ln + str(int(1 / random.random() ** 3)), ]
 
-    emailChoices = [float(line[2]) for line in EMAIL_DATA]
-
     return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
-           random.choices(EMAIL_DATA, emailChoices)[0][1]
-
+           requests.get('https://api.mail.tm/domains').json().get('hydra:member')[0].get('domain')
 
 def main():
     while True:
@@ -298,12 +221,21 @@ def main():
 
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
-        fake_email = random_email(fake_first_name+' '+fake_last_name)
+        if (args.mailtm == MAILTM_DISABLED):
+            response = requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').json()
+
+            fake_email = response.get('email_addr')
+            mail_sid = response.get('sid_token')
+
+        elif (args.mailtm == MAILTM_ENABLED):
+            fake_email = requests.post('https://api.mail.tm/accounts', data='{"address":"'+random_email(fake_first_name+' '+fake_last_name)+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('address')
+            mail_sid = requests.post('https://api.mail.tm/token', data='{"address":"'+fake_email+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('token')
 
         fake_identity = {
             'first_name': fake_first_name,
             'last_name': fake_last_name,
             'email': fake_email
+            'sid' : mail_sid
         }
 
         try:
