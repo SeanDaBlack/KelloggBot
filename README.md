@@ -1,4 +1,7 @@
 # KelloggBot
+[Setup](#setup)\
+[Usage](#usage)
+
 Credit to SeanDaBlack for the basis of the script.
 
 main.py is selenium python bot.
@@ -30,4 +33,15 @@ this just tells the OS it's safe to use this driver, and Selenium will start wor
 
 You will also need to install ffmpeg if it is not already installed: [Mac installation guide](https://superuser.com/a/624562) [Windows installation guide](https://www.wikihow.com/Install-FFmpeg-on-Windows)
 
+# Usage
+```
+usage: A script to automate very legitimate applications to kellogg's production plants affected by union strikes
+       python3 main.py [-h] [--debug] [--mailtm]
 
+options:
+  -h, --help  show this help message and exit
+  --debug     Puts script in a 'debug' mode where the Chrome GUI is visible
+  --mailtm    Uses mail.tm instead of guerrilla mail by default
+
+Kellogg bad | Union good | Support strike funds
+```

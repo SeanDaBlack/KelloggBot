@@ -10,3 +10,7 @@ chromedriver.*
 __pycache__/
 captcha_audio.*
 *-Resume.*
+.vscode/
+*.pdf
+*.png
+*.html
