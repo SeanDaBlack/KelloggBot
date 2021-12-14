@@ -52,13 +52,14 @@ def start_driver(random_city):
         options.add_argument(f"user-agent={USER_AGENT}")
         options.add_argument('disable-blink-features=AutomationControlled')
         options.headless = True
-        driver = webdriver.Chrome(options=options)
+        driver = webdriver.Chrome(ChromeDriverManager().install(),options=options)
         driver.set_window_size(1440, 900)
     elif (args.debug == DEBUG_ENABLED):
-        driver = webdriver.Chrome()
+        driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
-    WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, CREATE_AN_ACCOUNT_BUTTON)))
+    time.sleep(15)
+    #WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, CREATE_AN_ACCOUNT_BUTTON)))
     driver.find_element_by_xpath(APPLY_NOW_BUTTON_1).click()
     driver.find_element_by_xpath(APPLY_NOW_BUTTON_2).click()
     driver.find_element_by_xpath(CREATE_AN_ACCOUNT_BUTTON).click()
@@ -222,19 +223,23 @@ def main():
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
         if (args.mailtm == MAILTM_DISABLED):
+            printf(f"USING GUERRILLA TO CREATE EMAIL")
             response = requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').json()
 
             fake_email = response.get('email_addr')
             mail_sid = response.get('sid_token')
+            printf(f"EMAIL CREATED")
 
         elif (args.mailtm == MAILTM_ENABLED):
+            printf(f"USING MAILTM TO CREATE EMAIL")
             fake_email = requests.post('https://api.mail.tm/accounts', data='{"address":"'+random_email(fake_first_name+' '+fake_last_name)+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('address')
             mail_sid = requests.post('https://api.mail.tm/token', data='{"address":"'+fake_email+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('token')
+            printf(f"EMAIL CREATED")
 
         fake_identity = {
             'first_name': fake_first_name,
             'last_name': fake_last_name,
-            'email': fake_email
+            'email': fake_email,
             'sid' : mail_sid
         }
 

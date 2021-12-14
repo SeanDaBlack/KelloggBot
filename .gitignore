@@ -13,3 +13,4 @@ captcha_audio.*
 .vscode/
 *.pdf
 *.png
+*.html
