@@ -82,7 +82,7 @@ def generate_account(driver, fake_identity):
         elif key == 'last_name':
             info = fake_identity['last_name']
         elif key == 'pn':
-            info = fake.phone_number()
+            info = fake_identity['phone']
 
         driver.find_element_by_xpath(XPATHS_2.get(key)).send_keys(info)
 
@@ -96,6 +96,7 @@ def generate_account(driver, fake_identity):
     time.sleep(1.5)
     driver.find_element_by_xpath(ACCEPT_BUTTON).click()
     time.sleep(2)
+    
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
     for i in range(120):
@@ -126,7 +127,7 @@ def generate_account(driver, fake_identity):
 def fill_out_application_and_submit(driver, random_city, fake_identity):
     # make resume
     resume_filename = fake_identity['last_name']+'-Resume'
-    make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], resume_filename+'.pdf')
+    make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], fake_identity['phone'], resume_filename)
     images = convert_from_path(resume_filename+'.pdf')
     images[0].save(resume_filename+'.png', 'PNG')
 
@@ -222,6 +223,7 @@ def main():
 
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
+        fake_phone = fake.phone_number()
         if (args.mailtm == MAILTM_DISABLED):
             printf(f"USING GUERRILLA TO CREATE EMAIL")
             response = requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').json()
@@ -240,6 +242,7 @@ def main():
             'first_name': fake_first_name,
             'last_name': fake_last_name,
             'email': fake_email,
+            'phone': fake_phone
             'sid' : mail_sid
         }
 
