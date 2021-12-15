@@ -66,8 +66,20 @@ def get_verification_code(username: str, password: str):
 
     _, msg = imap.fetch(str(num_messages), '(RFC822)')
     body = email.message_from_bytes(msg[0][1]).get_payload()
+    delete_last_message(imap)
+
+    found_passcode = re.search('(?<=n is ).*?(?=<)', body)
+    return found_passcode.group(0) if found_passcode else None
+
+def delete_last_message(imap: imaplib.IMAP4_SSL):
+    _, messages = imap.select('INBOX')
+    imap.sort('REVERSE DATE','UTF-8','ALL')
+
+    num_messages = int(messages[0])
+    if not num_messages:
+        return 
+
+    _, msg = imap.fetch(str(num_messages), '(RFC822)')
     message_num = msg[0][0].split()[0]
     imap.store(message_num, '+FLAGS', '\\Deleted')
     imap.expunge()
-    return re.search('(?<=n is ).*?(?=<)', body).group(0)
-    
