@@ -65,8 +65,7 @@ def start_driver(random_city):
 
 def generate_account(driver, fake_identity, mailcom_username, mailcom_password):
     # make fake account info and fill
-
-    email = fake.free_email()
+    print('Filling in account information')
     password = fake.password()
 
     for key in XPATHS_2.keys():
@@ -95,6 +94,8 @@ def generate_account(driver, fake_identity, mailcom_username, mailcom_password):
     time.sleep(2)
     driver.find_element_by_xpath(CREATE_ACCOUNT_BUTTON).click()
     time.sleep(1.5)
+
+    print('Waiting for verification code...')
     for i in range(120):
         time.sleep(1.5)
         passcode = mailcom.get_verification_code(mailcom_username, mailcom_password)
@@ -102,16 +103,18 @@ def generate_account(driver, fake_identity, mailcom_username, mailcom_password):
             break
     else:
         raise Exception('No verification code found!')
+    print('Success: '+passcode)
 
     driver.find_element_by_xpath(VERIFY_EMAIL_INPUT).send_keys(passcode)
     driver.find_element_by_xpath(VERIFY_EMAIL_BUTTON).click()
 
-    printf(f"successfully made account for fake email {email}")
+    print('Successfully made account')
 
 
 def fill_out_application_and_submit(driver, random_city, fake_identity):
     # make resume
-    resume_filename = fake_identity['last_name']+'-Resume'
+    print('Generating resume')
+    resume_filename = fake.word()
     make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], resume_filename+'.pdf')
     images = convert_from_path(resume_filename+'.pdf')
     images[0].save(resume_filename+'.png', 'PNG')
@@ -120,11 +123,11 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
     WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, PROFILE_INFORMATION_DROPDOWN)))
 
     # fill out form parts of app
+    print('Filling out application')
     driver.find_element_by_xpath(PROFILE_INFORMATION_DROPDOWN).click()
     driver.find_element_by_xpath(CANDIDATE_SPECIFIC_INFORMATION_DROPDOWN).click()
 
     for key in XPATHS_1.keys():
-
         if key == 'resume':
             driver.find_element_by_xpath(UPLOAD_A_RESUME_BUTTON).click()
             info = os.getcwd() + '/'+resume_filename+'.png'
@@ -141,8 +144,6 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
             info = f'{format(first, ",")}-{format(random.randrange(first + 5000, 35000, 5000), ",")}'
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
-
-    printf(f"successfully filled out app forms for {random_city}")
 
     # fill out dropdowns
     select = Select(driver.find_element_by_id(CITIZEN_QUESTION_LABEL))
@@ -175,7 +176,7 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
 
     time.sleep(5)
     driver.find_element_by_xpath(APPLY_BUTTON).click()
-    printf(f"successfully submitted application")
+    print('Successfully submitted application')
 
     # take out the trash
     os.remove(resume_filename+'.pdf')
@@ -195,13 +196,26 @@ def random_email(name=None):
     return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower()
 
 def main():
+    print("""
+    __ __     ____                  ____        __ 
+   / //_/__  / / /___  ____ _____ _/ __ )____  / /_
+  / ,< / _ \/ / / __ \/ __ `/ __ `/ __  / __ \/ __/
+ / /| /  __/ / / /_/ / /_/ / /_/ / /_/ / /_/ / /_  
+/_/ |_\___/_/_/\____/\__, /\__, /_____/\____/\__/  
+                    /____//____/
+    """)
     mailcom_username = input('Mail.com Username: ')
     mailcom_password = input('         Password: ')
+    print()
+
+    print('Logging in to Mail.com')
     mailcom_driver = mailcom.start_driver(args.debug)
     mailcom.login(mailcom_driver, mailcom_username, mailcom_password)
 
+    print()
     while True:
         random_city = random.choice(list(CITIES_TO_URLS.keys()))
+        print('Starting new application for '+random_city)
         try:
             driver = start_driver(random_city)
         except Exception as e:
@@ -213,6 +227,7 @@ def main():
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
         fake_email = mailcom.add_alias(mailcom_driver, random_email(fake_first_name+' '+fake_last_name))
+        print('Created email alias '+fake_email+' for '+fake_first_name+' '+fake_last_name)
 
         fake_identity = {
             'first_name': fake_first_name,
@@ -236,6 +251,7 @@ def main():
 
         driver.close()
         time.sleep(5)
+        print()
 
 
 if __name__ == '__main__':
