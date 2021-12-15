@@ -4,7 +4,6 @@
 .Rhistory
 chromedriver
 chromedriver/
-.DS_Store
 chromedriver
 chromedriver.*
 __pycache__/

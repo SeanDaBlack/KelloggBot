@@ -1,8 +1,6 @@
-import requests
 import functools
 import os
 import random
-import re
 import sys
 import time
 import argparse
@@ -15,7 +13,9 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
 from resume_faker import make_resume
+import mailcom
 from pdf2image import convert_from_path
 
 from webdriver_manager.chrome import ChromeDriverManager
@@ -66,7 +66,7 @@ def start_driver(random_city):
     return driver
 
 
-def generate_account(driver, fake_identity):
+def generate_account(driver, fake_identity, mailcom_username, mailcom_password):
     # make fake account info and fill
 
     email = fake.free_email()
@@ -100,22 +100,11 @@ def generate_account(driver, fake_identity):
     time.sleep(1.5)
     for i in range(120):
         time.sleep(1.5)
-        if (args.mailtm == MAILTM_DISABLED):
-            mail = requests.get(f'https://api.guerrillamail.com/ajax.php?f=check_email&seq=1&sid_token={fake_identity.get("sid")}').json().get('list')
-
-            if mail:
-                passcode = re.findall('(?<=n is ).*?(?=<)', requests.get(f'https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id={mail[0].get("mail_id")}&sid_token={fake_identity.get("sid")}').json().get('mail_body'))[0]
-                break
-
-        elif (args.mailtm == MAILTM_ENABLED):
-            mail = requests.get("https://api.mail.tm/messages?page=1", headers={'Authorization':f'Bearer {fake_identity.get("sid")}'}).json().get('hydra:member')
-
-            if mail:
-                passcode = re.findall('(?<=n is ).*', requests.get(f'https://api.mail.tm{mail[0].get("@id")}', headers={'Authorization':f'Bearer {fake_identity.get("sid")}'}).json().get('text'))[0]
-                break
+        passcode = mailcom.get_verification_code(mailcom_username, mailcom_password)
+        if passcode:
+            break
     else:
-        args.mailtm ^= True
-        main() # I should probably find a better way to do this.
+        raise Exception('No verification code found!')
 
     driver.find_element_by_xpath(VERIFY_EMAIL_INPUT).send_keys(passcode)
     driver.find_element_by_xpath(VERIFY_EMAIL_BUTTON).click()
@@ -206,10 +195,14 @@ def random_email(name=None):
                 lambda fn, ln, *names: fn + "_" + ln + str(int(1 / random.random() ** 3)),
                 lambda fn, ln, *names: fn[0] + "_" + ln + str(int(1 / random.random() ** 3)), ]
 
-    return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
-           requests.get('https://api.mail.tm/domains').json().get('hydra:member')[0].get('domain')
+    return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower()
 
 def main():
+    mailcom_username = input('Mail.com Username: ')
+    mailcom_password = input('         Password: ')
+    mailcom_driver = mailcom.start_driver()
+    mailcom.login(mailcom_driver, mailcom_username, mailcom_password)
+
     while True:
         random_city = random.choice(list(CITIES_TO_URLS.keys()))
         try:
@@ -222,29 +215,16 @@ def main():
 
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
-        if (args.mailtm == MAILTM_DISABLED):
-            printf(f"USING GUERRILLA TO CREATE EMAIL")
-            response = requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').json()
-
-            fake_email = response.get('email_addr')
-            mail_sid = response.get('sid_token')
-            printf(f"EMAIL CREATED")
-
-        elif (args.mailtm == MAILTM_ENABLED):
-            printf(f"USING MAILTM TO CREATE EMAIL")
-            fake_email = requests.post('https://api.mail.tm/accounts', data='{"address":"'+random_email(fake_first_name+' '+fake_last_name)+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('address')
-            mail_sid = requests.post('https://api.mail.tm/token', data='{"address":"'+fake_email+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('token')
-            printf(f"EMAIL CREATED")
+        fake_email = mailcom.add_alias(mailcom_driver, random_email(fake_first_name+' '+fake_last_name))
 
         fake_identity = {
             'first_name': fake_first_name,
             'last_name': fake_last_name,
-            'email': fake_email,
-            'sid' : mail_sid
+            'email': fake_email
         }
 
         try:
-            generate_account(driver, fake_identity)
+            generate_account(driver, fake_identity, mailcom_username, mailcom_password)
         except Exception as e:
             printf(f"FAILED TO CREATE ACCOUNT: {e}")
             pass
