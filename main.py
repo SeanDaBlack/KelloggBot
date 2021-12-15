@@ -206,16 +206,14 @@ def main():
     """)
     mailcom_username = input('Mail.com Username: ')
     mailcom_password = input('         Password: ')
-    print()
 
-    print('Logging in to Mail.com')
+    print('Logging in to Mail.com...')
     mailcom_driver = mailcom.start_driver(args.debug)
     mailcom.login(mailcom_driver, mailcom_username, mailcom_password)
 
-    print()
     while True:
         random_city = random.choice(list(CITIES_TO_URLS.keys()))
-        print('Starting new application for '+random_city)
+        print('\nStarting new application for '+random_city)
         try:
             driver = start_driver(random_city)
         except Exception as e:
@@ -226,8 +224,9 @@ def main():
 
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
+        print('Getting email alias...')
         fake_email = mailcom.add_alias(mailcom_driver, random_email(fake_first_name+' '+fake_last_name))
-        print('Created email alias '+fake_email+' for '+fake_first_name+' '+fake_last_name)
+        print('Created alias '+fake_email+' for '+fake_first_name+' '+fake_last_name)
 
         fake_identity = {
             'first_name': fake_first_name,
@@ -251,7 +250,6 @@ def main():
 
         driver.close()
         time.sleep(5)
-        print()
 
 
 if __name__ == '__main__':

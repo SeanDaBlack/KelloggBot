@@ -8,6 +8,7 @@ import random
 import imaplib
 import email
 import re
+import time
 
 from constants.parser import *
 from constants.common import *
@@ -33,25 +34,33 @@ def login(driver: webdriver.Chrome, username: str, password: str):
     driver.find_element_by_id('login-email').send_keys(username)
     driver.find_element_by_id('login-password').send_keys(password)
     driver.find_element_by_class_name('login-submit').click()
+ 
+def add_alias(driver: webdriver.Chrome, alias: str) -> str:
+    driver.refresh()
+    time.sleep(4)
 
     # go to mail settings
     driver.find_element_by_xpath('//a[@data-item-name="more"]').click()
     driver.find_element_by_xpath('//a[@data-item-name="mail_settings"]').click()
     driver.switch_to.frame(driver.find_element_by_id('thirdPartyFrame_mail'))
+    time.sleep(2)
 
     # go to alias addresses
     driver.find_element_by_xpath('//a[@data-webdriver="ALL_EMAIL_ADDRESSES"]').click()
- 
-def add_alias(driver: webdriver.Chrome, alias: str) -> str:
+    time.sleep(2)
+
     # delete old alias
     try:
         actions = ActionChains(driver)
         actions.move_to_element(driver.find_element_by_class_name('is-last'))
         actions.perform()
+        time.sleep(0.1+random.random())
         driver.find_element_by_xpath('//a[@title="Delete Alias Address"]').click()
+        time.sleep(0.1+random.random())
         driver.find_element_by_xpath('//button[@data-webdriver="primary"]').click()
+        time.sleep(0.1+random.random())
     except Exception as e:
-        print('Unable to remove old alias. Likely it did not exist.')
+        print('Unable to remove old alias. Likely it did not exist. '+str(e))
 
     # add new alias
     driver.find_element_by_xpath('//input[@data-webdriver="localPart"]').send_keys(alias)
