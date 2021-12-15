@@ -25,7 +25,9 @@ def start_driver(debug: DEBUG_DISABLED) -> webdriver.Chrome :
     elif (debug == DEBUG_ENABLED):
         driver = webdriver.Chrome(ChromeDriverManager().install())
     """
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    options = Options()
+    options.add_argument('load-extension='+'./uBlock_Origin')
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     
     driver.get('https://mail.com/')
     driver.implicitly_wait(10)
