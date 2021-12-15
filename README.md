@@ -1,4 +1,7 @@
 # KelloggBot
+[Setup](#setup)\
+[Usage](#usage)
+
 Credit to SeanDaBlack for the basis of the script.
 
 main.py is selenium python bot.
@@ -28,4 +31,15 @@ You might also get a trust issue with the downloaded driver being unverified. To
 
 this just tells the OS it's safe to use this driver, and Selenium will start working. See https://timonweb.com/misc/fixing-error-chromedriver-cannot-be-opened-because-the-developer-cannot-be-verified-unable-to-launch-the-chrome-browser-on-mac-os/ for more info.
 
+# Usage
+```
+usage: A script to automate very legitimate applications to kellogg's production plants affected by union strikes
+       python3 main.py [-h] [--debug] [--mailtm]
 
+options:
+  -h, --help  show this help message and exit
+  --debug     Puts script in a 'debug' mode where the Chrome GUI is visible
+  --mailtm    Uses mail.tm instead of guerrilla mail by default
+
+Kellogg bad | Union good | Support strike funds
+```
