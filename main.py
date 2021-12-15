@@ -21,6 +21,10 @@ from pdf2image import convert_from_path
 from webdriver_manager.chrome import ChromeDriverManager
 os.environ['WDM_LOG_LEVEL'] = '0'
 
+from concurrent.futures import ThreadPoolExecutor
+executor = ThreadPoolExecutor(max_workers=500)
+processes = []
+
 from constants.common import *
 from constants.fileNames import *
 from constants.classNames import *
@@ -46,16 +50,7 @@ parser.add_argument('--mailtm',action='store_true',default=MAILTM_DISABLED,requi
 args = parser.parse_args()
 # END TEST
 
-def start_driver(random_city):
-    options = Options()
-    if (args.debug == DEBUG_DISABLED):
-        options.add_argument(f"user-agent={USER_AGENT}")
-        options.add_argument('disable-blink-features=AutomationControlled')
-        options.headless = True
-        driver = webdriver.Chrome(ChromeDriverManager().install(),options=options)
-        driver.set_window_size(1440, 900)
-    elif (args.debug == DEBUG_ENABLED):
-        driver = webdriver.Chrome(ChromeDriverManager().install())
+def initialize_driver(random_city, driver):
     driver.get(CITIES_TO_URLS[random_city])
     driver.implicitly_wait(10)
     time.sleep(15)
@@ -209,13 +204,28 @@ def random_email(name=None):
     return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
            requests.get('https://api.mail.tm/domains').json().get('hydra:member')[0].get('domain')
 
-def main():
+def run():
+    try:
+        options = Options()
+        if (args.debug == DEBUG_DISABLED):
+            options.add_argument(f"user-agent={USER_AGENT}")
+            options.add_argument('disable-blink-features=AutomationControlled')
+            options.headless = True
+            driver = webdriver.Chrome(ChromeDriverManager().install(),options=options)
+            driver.set_window_size(1440, 900)
+        elif (args.debug == DEBUG_ENABLED):
+            driver = webdriver.Chrome(ChromeDriverManager().install())
+    except:
+        print(f"FAILED TO START DRIVER: {e}")
+        # No pass, this error is fatal
+
+
     while True:
         random_city = random.choice(list(CITIES_TO_URLS.keys()))
         try:
-            driver = start_driver(random_city)
+            initialize_driver(random_city, driver)
         except Exception as e:
-            printf(f"FAILED TO START DRIVER: {e}")
+            print(f"FAILED TO INITIALIZE DRIVER: {e}")
             pass
 
         time.sleep(2)
@@ -260,6 +270,15 @@ def main():
         driver.close()
         time.sleep(5)
 
+
+def main():
+    global processes
+    global executor
+
+    parallel = int(input("How many parallel windows?: "))
+
+    for i in range(parallel):
+        processes.append(executor.submit(run))
 
 if __name__ == '__main__':
     main()
