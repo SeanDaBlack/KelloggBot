@@ -99,7 +99,7 @@ def generate_account(driver, fake_identity, mailcom_username, mailcom_password):
     time.sleep(1.5)
 
     print('Waiting for verification code...')
-    for i in range(120):
+    for _ in range(80):
         time.sleep(1.5)
         passcode = mailcom.get_verification_code(mailcom_username, mailcom_password)
         if passcode:
@@ -223,7 +223,8 @@ def main():
             driver = start_driver(random_city)
         except Exception as e:
             printf(f"FAILED TO START DRIVER: {e}")
-            pass
+            driver.close()
+            continue
 
         time.sleep(2)
 
@@ -232,9 +233,13 @@ def main():
         fake_phone = fake.phone_number()
         
         print('Getting email alias...')
-        fake_email = mailcom.add_alias(mailcom_driver, random_email(fake_first_name+' '+fake_last_name))
+        try:
+            fake_email = mailcom.add_alias(mailcom_driver, random_email(fake_first_name+' '+fake_last_name))
+        except Exception as e:
+            printf(f"FAILED TO CREATE ALIAS: {e}")
+            driver.close()
+            continue
         print('Created alias '+fake_email+' for '+fake_first_name+' '+fake_last_name)
-
         fake_identity = {
             'first_name': fake_first_name,
             'last_name': fake_last_name,
@@ -246,13 +251,13 @@ def main():
             generate_account(driver, fake_identity, args.username, args.password)
         except Exception as e:
             printf(f"FAILED TO CREATE ACCOUNT: {e}")
-            pass
+            driver.close()
+            continue
 
         try:
             fill_out_application_and_submit(driver, random_city, fake_identity)
         except Exception as e:
             printf(f"FAILED TO FILL OUT APPLICATION AND SUBMIT: {e}")
-            pass
             driver.close()
             continue
 
