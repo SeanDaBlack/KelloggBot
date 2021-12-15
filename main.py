@@ -39,7 +39,9 @@ printf = functools.partial(print, flush=True)
 
 #Option parsing
 parser = argparse.ArgumentParser(SCRIPT_DESCRIPTION,epilog=EPILOG)
-parser.add_argument('--debug',action='store_true',default=DEBUG_ENABLED,required=False,help=DEBUG_DESCRIPTION,dest='debug')
+parser.add_argument('--debug',action='store_true',default=DEBUG_DISABLED,required=False,help=DEBUG_DESCRIPTION,dest='debug')
+parser.add_argument('-u', '--username', help='Mail.com username', required=False, dest='username')
+parser.add_argument('-p', '--password', help='Mail.com password', required=False, dest='password')
 args = parser.parse_args()
 # END TEST
 
@@ -204,12 +206,14 @@ def main():
 /_/ |_\___/_/_/\____/\__, /\__, /_____/\____/\__/  
                     /____//____/
     """)
-    mailcom_username = input('Mail.com Username: ')
-    mailcom_password = input('         Password: ')
+    if not args.username:
+        args.username = input('Mail.com Username: ')
+    if not args.password:
+        args.password = input('Mail.com Password: ')
 
     print('Logging in to Mail.com...')
     mailcom_driver = mailcom.start_driver(args.debug)
-    mailcom.login(mailcom_driver, mailcom_username, mailcom_password)
+    mailcom.login(mailcom_driver, args.username, args.password)
 
     while True:
         random_city = random.choice(list(CITIES_TO_URLS.keys()))
@@ -235,7 +239,7 @@ def main():
         }
 
         try:
-            generate_account(driver, fake_identity, mailcom_username, mailcom_password)
+            generate_account(driver, fake_identity, args.username, args.password)
         except Exception as e:
             printf(f"FAILED TO CREATE ACCOUNT: {e}")
             pass

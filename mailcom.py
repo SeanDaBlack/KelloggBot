@@ -14,6 +14,7 @@ from constants.parser import *
 from constants.common import *
 
 def start_driver(debug: DEBUG_DISABLED) -> webdriver.Chrome :
+    """ This is flaky at best, and the window only spawns once so you can just minimize.
     options = Options()
     if (debug == DEBUG_DISABLED):
         options.add_argument(f"user-agent={USER_AGENT}")
@@ -23,6 +24,8 @@ def start_driver(debug: DEBUG_DISABLED) -> webdriver.Chrome :
         driver.set_window_size(1920, 1080)
     elif (debug == DEBUG_ENABLED):
         driver = webdriver.Chrome(ChromeDriverManager().install())
+    """
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     
     driver.get('https://mail.com/')
     driver.implicitly_wait(10)

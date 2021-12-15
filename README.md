@@ -40,11 +40,15 @@ You will also need to install ffmpeg if it is not already installed: [Mac instal
 # Usage
 ```
 usage: A script to automate very legitimate applications to kellogg's production plants affected by union strikes
-       python3 main.py [-h] [--debug] [--mailtm]
+       [-h] [--debug] [-u USERNAME] [-p PASSWORD]
 
 options:
-  -h, --help  show this help message and exit
-  --debug     Puts script in a 'debug' mode where the Chrome GUI is visible
+  -h, --help            show this help message and exit
+  --debug               Puts script in a 'debug' mode where the Chrome GUI is visible
+  -u USERNAME, --username USERNAME
+                        Mail.com username
+  -p PASSWORD, --password PASSWORD
+                        Mail.com password
 
 Kellogg bad | Union good | Support strike funds
 ```
