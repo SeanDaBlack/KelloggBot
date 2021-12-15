@@ -2,14 +2,27 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 
 import random
 import imaplib
 import email
 import re
 
-def start_driver() -> webdriver.Chrome :
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+from constants.parser import *
+from constants.common import *
+
+def start_driver(debug: DEBUG_DISABLED) -> webdriver.Chrome :
+    options = Options()
+    if (debug == DEBUG_DISABLED):
+        options.add_argument(f"user-agent={USER_AGENT}")
+        options.add_argument('disable-blink-features=AutomationControlled')
+        options.headless = True
+        driver = webdriver.Chrome(ChromeDriverManager().install(),options=options)
+        driver.set_window_size(1920, 1080)
+    elif (debug == DEBUG_ENABLED):
+        driver = webdriver.Chrome(ChromeDriverManager().install())
+    
     driver.get('https://mail.com/')
     driver.implicitly_wait(10)
     return driver

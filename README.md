@@ -7,6 +7,10 @@ Credit to SeanDaBlack for the basis of the script.
 main.py is selenium python bot.
 sc.js is a the base of the ios shortcut [COMING SOON]
 
+# Prerequisites
+
+You must have an account with [Mail.com](https://mail.com) for recieving verification emails. Your username and password are entered into the app as plaintext, but are never stored and only transmitted through SSL encryption. You should still use a burner account, not one you care about.
+
 # Setup
 
 On mac/pc:
@@ -41,7 +45,6 @@ usage: A script to automate very legitimate applications to kellogg's production
 options:
   -h, --help  show this help message and exit
   --debug     Puts script in a 'debug' mode where the Chrome GUI is visible
-  --mailtm    Uses mail.tm instead of guerrilla mail by default
 
 Kellogg bad | Union good | Support strike funds
 ```

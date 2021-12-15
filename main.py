@@ -4,7 +4,6 @@ import random
 import sys
 import time
 import argparse
-from selenium.webdriver.chrome import options
 
 from faker import Faker
 from selenium import webdriver
@@ -12,7 +11,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 
 from resume_faker import make_resume
 import mailcom
@@ -41,8 +39,7 @@ printf = functools.partial(print, flush=True)
 
 #Option parsing
 parser = argparse.ArgumentParser(SCRIPT_DESCRIPTION,epilog=EPILOG)
-parser.add_argument('--debug',action='store_true',default=DEBUG_DISABLED,required=False,help=DEBUG_DESCRIPTION,dest='debug')
-parser.add_argument('--mailtm',action='store_true',default=MAILTM_DISABLED,required=False,help=MAILTM_DESCRIPTION,dest='mailtm')
+parser.add_argument('--debug',action='store_true',default=DEBUG_ENABLED,required=False,help=DEBUG_DESCRIPTION,dest='debug')
 args = parser.parse_args()
 # END TEST
 
@@ -200,7 +197,7 @@ def random_email(name=None):
 def main():
     mailcom_username = input('Mail.com Username: ')
     mailcom_password = input('         Password: ')
-    mailcom_driver = mailcom.start_driver()
+    mailcom_driver = mailcom.start_driver(args.debug)
     mailcom.login(mailcom_driver, mailcom_username, mailcom_password)
 
     while True:
