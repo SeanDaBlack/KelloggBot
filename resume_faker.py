@@ -2099,6 +2099,8 @@ def make_resume(name: str=fake.name(), email=fake.free_email(), phone=fake.phone
     year = date.today().year
     grad_year = random.randrange(1990,year-10)
     midyear = int(grad_year + (year-grad_year)*0.1*random.randrange(3,7))
+    college = random.choice(UNIVERSITIES)
+    degree = random.choice(DEGREES)
 
     template = random.choice([file for file in os.listdir(TEMPLATES_FOLDER) if file.endswith('.tex')])
     with open(os.path.join(TEMPLATES_FOLDER, template)) as input, open(os.path.join(PACKAGES_FOLDER, 'auto_resume.tex'), 'a') as output:
@@ -2115,8 +2117,8 @@ def make_resume(name: str=fake.name(), email=fake.free_email(), phone=fake.phone
             line = re.sub('@@EMAIL@@', email, line)
             line = re.sub('@@CITY@@', fake.city(), line)
 
-            line = re.sub('@@UNIVERSITY@@', random.choice(UNIVERSITIES), line)
-            line = re.sub('@@DEGREE@@', random.choice(DEGREES), line)
+            line = re.sub('@@UNIVERSITY@@', college, line)
+            line = re.sub('@@DEGREE@@', degree, line)
             line = re.sub('@@ENROLLYEAR@@', str(grad_year-4), line)
             line = re.sub('@@GRADYEAR@@', str(grad_year), line)
             line = re.sub('@@GPA@@', str(round(3+random.random(), 2)).ljust(4,'0'), line)
@@ -2142,3 +2144,4 @@ def make_resume(name: str=fake.name(), email=fake.free_email(), phone=fake.phone
             os.remove(os.path.join(PACKAGES_FOLDER,'auto_resume.'+ext))
         except Exception:
             continue
+    return college

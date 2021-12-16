@@ -67,8 +67,8 @@ INDUSTRY_LIST = [
 
 GRADUATION_STATUS = [
     'Actively Pursuing the Degree',
-    'Graduated - Degree Received',
     'Completed - Non Degree Program',
+    'Graduated - Degree Received',
     'No Longer Pursuing the Degree'
 ]
 
