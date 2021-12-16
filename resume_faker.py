@@ -55,7 +55,7 @@ def make_resume(name, email, path = 'output.pdf'):
         'Bachelor of Arts in Organizational Psychology',
         'Bachelor of Science in Aerospace Engineering',
         'Bachelor of Science in Accountancy',
-        'Bachelor of Science in Actuarial',
+        'Bachelor of Science in Actuarial Science',
         'Bachelor of Science in Agriculture',
         'Bachelor of Science in Applied Economics',
         'Bachelor of Science in Architecture',
