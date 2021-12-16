@@ -1,0 +1,264 @@
+% Raleway for LaTeX
+%
+% Silke Hofstra, tex@slxh.nl
+%
+% This file selects either the OTF or the TYPE1 fonts based on
+% the LaTeX engine used.
+%
+% Licenced under the LPPL v1.3 or higher.
+%
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{raleway}[2016/12/03 v1.4 Matt McInerney’s Raleway family]
+
+\RequirePackage{ifxetex,ifluatex,xkeyval}
+
+% Switches
+\newif\ifraleway@otf
+\newif\ifraleway@default
+\newif\ifraleway@sfdefault
+\newif\ifraleway@oldstyle
+\newif\ifraleway@tabular
+\newif\ifraleway@black
+\newif\ifraleway@extrabold
+\newif\ifraleway@semibold
+\newif\ifraleway@medium
+\newif\ifraleway@light
+\newif\ifraleway@extralight
+\newif\ifraleway@thin
+
+% Scaling command
+\newcommand*{\Raleway@scale}{1}
+
+% Use OpenType fonts for XeTeX and LuaTeX.
+\ifxetex
+	\raleway@otftrue
+\else
+	\ifluatex
+		\raleway@otftrue
+	\fi
+\fi
+
+\DeclareOptionX{lining}      {\raleway@oldstylefalse}
+\DeclareOptionX{nf}          {\raleway@oldstylefalse}
+\DeclareOptionX{lf}          {\raleway@oldstylefalse}
+\DeclareOptionX{oldstyle}    {\raleway@oldstyletrue}
+\DeclareOptionX{osf}         {\raleway@oldstyletrue}
+\DeclareOptionX{black}       {\raleway@blacktrue}
+\DeclareOptionX{extrabold}   {\raleway@extraboldtrue}
+\DeclareOptionX{semibold}    {\raleway@semiboldtrue}
+\DeclareOptionX{bold}        {}
+\DeclareOptionX{thin}        {\raleway@thintrue}
+\DeclareOptionX{extralight}  {\raleway@extralighttrue}
+\DeclareOptionX{light}       {\raleway@lighttrue}
+\DeclareOptionX{regular}     {}
+\DeclareOptionX{medium}      {\raleway@mediumtrue}
+\DeclareOptionX{scale}       {\renewcommand*{\Raleway@scale}{#1}}
+\DeclareOptionX{scaled}      {\renewcommand*{\Raleway@scale}{#1}}
+\DeclareOptionX{default}     {\raleway@defaulttrue}
+\DeclareOptionX{sfdefault}   {\raleway@sfdefaulttrue}
+\DeclareOptionX{nosfdefault} {\raleway@sfdefaultfalse}
+\DeclareOptionX{type1}       {\raleway@otffalse}
+\DeclareOptionX{t1}          {\raleway@otffalse}
+\DeclareOptionX{opentype}    {\raleway@otftrue}
+\DeclareOptionX{otf}         {\raleway@otftrue}
+
+% Default options
+\ExecuteOptionsX{sfdefault,lining,bold,regular}
+\ProcessOptionsX\relax
+
+% Load OpenType files
+\ifraleway@otf
+	\RequirePackage{fontspec}
+	
+	% Oldstyle/Lining
+	\ifraleway@oldstyle
+		\def\raleway@figurestyle{OldStyle}
+	\else
+		\def\raleway@figurestyle{Lining}
+	\fi
+	
+	% Black/Semibold/Bold
+	\ifraleway@extrabold
+		\def\raleway@boldstyle{ExtraBold}
+	\else
+		\ifraleway@semibold
+			\def\raleway@boldstyle{Semibold}
+		\else
+			\ifraleway@black
+				\def\raleway@boldstyle{Black}
+			\else
+				\def\raleway@boldstyle{Bold}
+			\fi
+		\fi
+	\fi
+	
+	% Light/ExtraLight/Regular/Medium
+	\ifraleway@light
+		\def\raleway@regstyle{Light}
+	\else
+		\ifraleway@extralight
+			\def\raleway@regstyle{ExtraLight}
+		\else
+			\ifraleway@thin
+				\def\raleway@regstyle{Thin}
+			\else
+				\ifraleway@medium
+					\def\raleway@regstyle{Medium}
+				\else
+					\def\raleway@regstyle{Regular}
+				\fi
+			\fi
+		\fi
+	\fi
+	
+	% Shared features
+	\defaultfontfeatures{
+		Ligatures = TeX ,
+		Numbers   = \raleway@figurestyle ,
+		Scale     = \Raleway@scale ,
+		Extension = .otf }
+	
+	% Sans serif font
+	\ifraleway@sfdefault
+		\setsansfont
+			[ UprightFont    = *-\raleway@regstyle ,
+			  ItalicFont     = *-\raleway@regstyle-Italic ,
+			  BoldFont       = *-\raleway@boldstyle ,
+			  BoldItalicFont = *-\raleway@boldstyle-Italic
+			]
+			{Raleway}
+	\fi
+	
+	% Font families
+	% Regular/Bold
+	\newfontfamily\raleway
+		[ UprightFont    = *-Regular ,
+		  ItalicFont     = *-Regular-Italic ,
+		  BoldFont       = *-Bold ,
+		  BoldItalicFont     = *-Bold-Italic ]
+		{Raleway}
+		
+	\newfontfamily\ralewaymedium
+		[ UprightFont    = *-Medium ,
+		  ItalicFont     = *-Medium-Italic ,
+		  BoldFont       = *-Bold ,
+		  BoldItalicFont = *-Bold-Italic ]
+		{Raleway}
+
+	% Light/Semibold
+	\newfontfamily\ralewaylight
+		[ UprightFont    = *-Light ,
+		  ItalicFont     = *-Light-Italic ,
+		  BoldFont       = *-SemiBold ,
+		  BoldItalicFont = *-SemiBold-Italic ]
+		{Raleway}
+	
+	% Light/Semibold
+	\newfontfamily\ralewaythin
+		[ UprightFont    = *-Thin ,
+		  ItalicFont     = *-Thin-Italic ,
+		  BoldFont       = *-Black ,
+		  BoldItalicFont = *-Black-Italic ]
+		{Raleway}
+	
+	% ExtraLight/Black
+	\newfontfamily\ralewayextra
+		[ UprightFont    = *-ExtraLight ,
+		  ItalicFont     = *-ExtraLight-Italic ,
+		  BoldFont       = *-ExtraBold ,
+		  BoldItalicFont = *-ExtraBold-Italic ]
+		{Raleway}
+	
+	% Dont keep all default font features
+	\defaultfontfeatures{}
+	
+	\newfontfamily\ralewayLF
+		[ Ligatures      = TeX ,
+		  Numbers        = Lining ,
+		  Scale          = \Raleway@scale ,
+		  Extension      = .otf ,
+		  UprightFont    = *-\raleway@regstyle ,
+		  ItalicFont     = *-\raleway@regstyle-Italic ,
+		  BoldFont       = *-\raleway@boldstyle ,
+		  BoldItalicFont = *-\raleway@boldstyle-Italic ]
+		{Raleway}
+
+% Load type1 font.
+\else
+	\RequirePackage[OT1,LY1,T1]{fontenc}
+	\RequirePackage{mweights}
+	
+	% Tabular/Proportional
+	\ifraleway@tabular
+		\def\raleway@figurealign{T}
+	\else
+		\def\raleway@figurealign{T}
+	\fi
+	
+	% Oldstyle/Lining
+	\ifraleway@oldstyle
+		\def\raleway@figurestyle{OsF}
+	\else
+		\def\raleway@figurestyle{LF}
+	\fi
+	
+	% Black/Semibold/Bold
+	\ifraleway@extrabold
+		\def\bfseries@sf{eb}
+	\else
+		\ifraleway@semibold
+			\def\bfseries@sf{sb}
+		\else
+			\ifraleway@black
+				\def\bfseries@sf{k}
+			\else
+				\def\bfseries@sf{b}
+			\fi
+		\fi
+	\fi
+	
+	% Light/ExtraLight/Regular/Medium/Thin
+	\ifraleway@light
+		\def\mdseries@sf{l}
+	\else
+		\ifraleway@extralight
+			\def\mdseries@sf{el}
+		\else
+			\ifraleway@thin
+				\def\mdseries@sf{t}
+			\else
+				\ifraleway@medium
+					\def\mdseries@sf{mb}
+				\else
+					\def\mdseries@sf{m}
+				\fi
+			\fi
+		\fi
+	\fi
+
+	% Sans serif font
+	\ifraleway@sfdefault
+		\edef\sfdefault{Raleway-\raleway@figurealign\raleway@figurestyle}
+	\fi
+	
+	% If Raleway is the default font \oldstylenums needs a new definition.
+	\ifraleway@default
+		\renewcommand*\oldstylenums[1]{%
+			\begingroup
+				\ifmmode
+					\mathgroup\symletters #1%
+				\else
+					\fontfamily{Raleway-\raleway@figurealign OsF}\selectfont #1%
+				\fi
+			\endgroup
+		}
+		\edef\seriesdefault{\mdseries@sf}
+	\fi
+\fi
+
+% Set default font family
+\ifraleway@default
+	\edef\familydefault{\sfdefault}
+\fi
+
+\endinput

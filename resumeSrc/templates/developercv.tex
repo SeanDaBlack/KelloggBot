@@ -1,0 +1,106 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Developer CV
+% LaTeX Template
+% Version 1.0 (28/1/19)
+%
+% This template originates from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Jan Vorisek (jan@vorisek.me)
+% Based on a template by Jan Küster (info@jankuester.com)
+% Modified for LaTeX Templates by Vel (vel@LaTeXTemplates.com)
+%
+% License:
+% The MIT License (see included LICENSE file)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[9pt]{developercv} % Default font size, values from 8-12pt are recommended
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE AND CONTACT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\begin{minipage}[t]{0.45\textwidth} % 45% of the page width for name
+	\vspace{-\baselineskip} % Required for vertically aligning minipages
+	
+	% If your name is very short, use just one of the lines below
+	% If your name is very long, reduce the font size or make the minipage wider and reduce the others proportionately
+	\colorbox{black}{{\HUGE\textcolor{white}{\textbf{\MakeUppercase{@@FIRSTNAME@@}}}}} % First name
+	
+	\colorbox{black}{{\HUGE\textcolor{white}{\textbf{\MakeUppercase{@@LASTNAME@@}}}}} % Last name
+	
+	\vspace{6pt}
+	
+	{\huge @@JOB@@} % Career or current job title
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.275\textwidth} % 27.5% of the page width for the first row of icons
+	\vspace{-\baselineskip} % Required for vertically aligning minipages
+	
+	% The first parameter is the FontAwesome icon name, the second is the box size and the third is the text
+	% Other icons can be found by referring to fontawesome.pdf (supplied with the template) and using the word after \fa in the command for the icon you want
+	\icon{MapMarker}{12}{@@CITY@@}\\
+	\icon{Phone}{12}{@@PHONE@@}\\
+	\icon{At}{12}{\href{mailto:@@EMAIL@@}{@@EMAIL@@}}\\	
+\end{minipage}
+
+\vspace{0.5cm}
+
+%----------------------------------------------------------------------------------------
+%	EXPERIENCE
+%----------------------------------------------------------------------------------------
+
+\cvsect{Experience}
+
+\begin{entrylist}
+	\entry
+		{@@MIDDLEYEAR@@ -- @@THISYEAR@@}
+		{@@JOB@@}
+		{@@COMPANY@@}
+		{@@PARAGRAPH@@ @@PARAGRAPH@@}
+	\entry
+		{@@GRADYEAR@@ -- @@MIDDLEYEAR@@}
+		{@@JOB@@}
+		{@@COMPANY@@}
+		{@@PARAGRAPH@@ @@PARAGRAPH@@}
+\end{entrylist}
+
+%----------------------------------------------------------------------------------------
+%	EDUCATION
+%----------------------------------------------------------------------------------------
+
+\cvsect{Education}
+
+\begin{entrylist}
+	\entry
+		{@@ENROLLYEAR@@ -- @@GRADYEAR@@}
+		{@@DEGREE@@}
+		{@@UNIVERSITY@@}
+		{@@PARAGRAPH@@ @@PARAGRAPH@@}
+\end{entrylist}
+
+%----------------------------------------------------------------------------------------
+%	SKILLS
+%----------------------------------------------------------------------------------------
+\cvsect{Skills}
+\begin{itemize} \vspace{-10pt}
+\item @@WORDS@@ \vspace{-5pt}
+\item @@WORDS@@ \vspace{-5pt}
+\item @@WORDS@@ \vspace{-5pt}
+\item @@WORDS@@ \vspace{-5pt}
+\item @@WORDS@@ \vspace{-5pt}
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
