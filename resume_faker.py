@@ -4,14 +4,16 @@ from datetime import date
 import re
 import os
 import subprocess
+import shutil
 
 fake = Faker()
 
 silent = True
 
-ROOT_FOLDER = './resumeSrc/'
-TEMPLATES_FOLDER = ROOT_FOLDER+'templates/'
-PACKAGES_FOLDER = ROOT_FOLDER+'packages/'
+BASE = os.getcwd()
+ROOT_FOLDER = os.path.join(BASE, 'resumeSrc')
+TEMPLATES_FOLDER = os.path.join(ROOT_FOLDER, 'templates')
+PACKAGES_FOLDER = os.path.join(ROOT_FOLDER, 'packages')
 
 UNIVERSITIES = [
     'University of Alaska',
@@ -2090,17 +2092,16 @@ DEGREES = [
 def make_resume(name, email, phone, filename='resume'):
     for ext in ['tex','aux','log','out']:
         try:
-            os.remove(PACKAGES_FOLDER+'auto_resume.'+ext)
+            os.remove(os.path.join(PACKAGES_FOLDER, 'auto_resume.'+ext))
         except Exception:
             continue
-    
+
     year = date.today().year
     grad_year = random.randrange(1990,year-10)
     midyear = int(grad_year + (year-grad_year)*0.1*random.randrange(3,7))
 
     template = random.choice([file for file in os.listdir(TEMPLATES_FOLDER) if file.endswith('.tex')])
-
-    with open(TEMPLATES_FOLDER+template) as input, open(PACKAGES_FOLDER+'auto_resume.tex', 'a') as output:
+    with open(os.path.join(TEMPLATES_FOLDER, template)) as input, open(os.path.join(PACKAGES_FOLDER, 'auto_resume.tex'), 'a') as output:
         for line in input.readlines():
             line = re.sub('@@WORDS@@', fake.sentence(6)[:-1], line)
             line = re.sub('@@PARAGRAPH@@', fake.paragraph(6), line)
@@ -2116,7 +2117,7 @@ def make_resume(name, email, phone, filename='resume'):
             line = re.sub('@@GRADYEAR@@', str(grad_year), line)
             line = re.sub('@@GPA@@', str(round(3+random.random(), 2)).ljust(4,'0'), line)
 
-            line = re.sub('@@THISYEAR@@', random.choice([str(year), 'Present']), line)
+            line = re.sub('@@THISYEAR@@', str(year), line)
             line = re.sub('@@MIDDLEYEAR@@', str(midyear), line)
             
             line = re.sub('@@JOB@@', fake.job(), line)
@@ -2124,15 +2125,16 @@ def make_resume(name, email, phone, filename='resume'):
 
             output.write(line)
 
+    pdflatex = str(os.path.splitext(shutil.which('pdflatex'))[0])
     subprocess.call(
-        ['pdflatex','auto_resume.tex'], 
+        [pdflatex, 'auto_resume.tex'],
         cwd=PACKAGES_FOLDER, 
         stderr = subprocess.DEVNULL if silent else None, 
         stdout = subprocess.DEVNULL if silent else None
     )
-    os.rename(PACKAGES_FOLDER+'auto_resume.pdf','./'+filename+'.pdf')
+    os.rename(os.path.join(PACKAGES_FOLDER, 'auto_resume.pdf'), os.path.join(BASE, filename+'.pdf'))
     for ext in ['tex','aux','log','out']:
         try:
-            os.remove(PACKAGES_FOLDER+'auto_resume.'+ext)
+            os.remove(os.path.join(PACKAGES_FOLDER,'auto_resume.'+ext))
         except Exception:
             continue

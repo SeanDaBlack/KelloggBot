@@ -30,7 +30,7 @@ from constants.parser import *
 from constants.urls import *
 from constants.xPaths import *
 
-os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
+# os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
 
 fake = Faker()
 
@@ -129,6 +129,7 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
     # make resume
     resume_filename = fake_identity['last_name']+'-Resume'
     make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], fake_identity['phone'], resume_filename)
+    printf(f"successfully created resume file: {resume_filename}.pdf")
 
     # wait for page to load
     WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, PROFILE_INFORMATION_DROPDOWN)))
@@ -140,13 +141,13 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
     for key in XPATHS_1.keys():
         if key == 'resume':
             driver.find_element_by_xpath(UPLOAD_A_RESUME_BUTTON).click()
-            info = os.getcwd() + '/'+resume_filename+'.pdf'
+            info = os.path.join(os.getcwd(), resume_filename+'.pdf')
         elif key == 'addy':
             info = fake.street_address()
         elif key == 'city':
             info = random_city
         elif key == 'zip':
-            info = CITIES_TO_ZIP_CODES[random_city]
+            info = CITIES_TO_ZIP_CODES[random_city][random.randint(0, 5)]
         elif key == 'job':
             info = fake.job()
         elif key == 'salary':
@@ -154,7 +155,7 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
             info = f'{format(first, ",")}-{format(random.randrange(first + 5000, 35000, 5000), ",")}'
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
-        if key == 'resume': time.sleep(8) # wait for "loading" animation
+        if key == 'resume': time.sleep(8) # wait for "loading" animation  <----- can probably be replaced with WebDriverWait
 
     printf(f"successfully filled out app forms for {random_city}")
 
@@ -230,7 +231,8 @@ def fill_out_education_info(driver):
         driver.find_element_by_xpath(DEGREE_TYPE_LABEL + '/option[text()="' + random.choice(DEGREE_TYPES) + '"]').click()
         print('successfully filled out degree information')
     except Exception as e:
-        print(f'Education info probably not required: {e}')
+        print(f'FAILED TO FILL OUT EDUCATION INFO: {e}')
+        # TODO: Implement click "remove" on education info section
     time.sleep(2)
 
 
@@ -239,7 +241,8 @@ def fill_out_work_history(driver):
         try:
             driver.find_element_by_xpath('(//select[@name="' + INDUSTRY_LABEL + '"]/option[text()="' + random.choice(INDUSTRY_LIST) + '"])[' + str(i+1) + ']').click()
         except Exception as e:
-            print(f'Probably no work experience section: {e}')
+            print(f'FAILED TO FILL OUT WORK HISTORY: {e}')
+            # TODO: Implement click "remove" on work history section
             pass
 
 
