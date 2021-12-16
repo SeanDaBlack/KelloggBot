@@ -1,0 +1,162 @@
+% import.sty  Ver 6.2  01-Apr-2020  Donald Arseneau  (asnd@triumf.ca)
+%
+% This software is in the public domain; free of any restrictions.
+%
+% Two new \LaTeX\ commands, "\import {<full-path>} {<file>}" and 
+% "\subimport {<path-extension>} {<file>}" are defined to input a file 
+% from another directory, allowing that file to find its own inputs
+% (using "\input", "\includegraphics" etc.) in that directory.
+% Alias command names are "\inputfrom" and "\subinputfrom".
+%
+% Also provided are "\includefrom" and "\subincludefrom", which are
+% based on the "\include" command, rather than "\input".
+%
+% For example, if a remote file "/user/friend/work/report.tex" has contents:
+%
+%      My graph: \includegraphics{picture}
+%      \input{explanation}
+%
+% then you can safely input that file in your own document with the command
+% "\import{/user/friend/work/}{report}"; the explanation and picture will 
+% be taken from the "/user/friend/work/" directory.
+%
+% The <full-path> argument for "\import" can be a full absolute path
+% or a relative path starting from the main working directory for the document.
+% The "\subimport" command facilitates nesting of file imports. It takes a
+% relative <path-extension> based on the location of the current file.
+%
+% For example, if a file is imported (using either command) from directory
+% "abc/" and that file contains the command "\subimport{lmn/}{xyz}" then
+% file "abc/lmn/xyz.tex" is input, and any "\input" commands in that file
+% will read files from directory "abc/lmn/".
+%
+% Find more documentation in import.tex or import.pdf.
+%
+% A hook "\import@path@fix" is provided to reformat the import path
+% to fit the syntax of a particular operating system.  It *could* be
+% defined to convert unix-style path names to the local format. The default
+% definition ensures paths end with "/" on most systems, but removes
+% "][" from within sub-import directory paths on VMS systems.
+%
+% Presently, the paths are defined `locally' (not globally) so input
+% files must have balanced grouping.
+%====================== END INSTRUCTIONS ===========================
+
+\ProvidesPackage{import}[2020/04/01 \space  v 6.2]
+\ProcessOptions
+
+\@ifundefined{import}{%
+ \newcommand{\import}{\global\let\import@path\@empty \@doimport\input}
+}{
+ \PackageWarning{import}{\string\import\space command is already defined!^^J%
+   Defining only its \string\inputfrom\space alias.}
+}
+\newcommand{\inputfrom}{\global\let\import@path\@empty \@doimport\input}
+\newcommand{\subimport}{\@doimport\input}
+\newcommand{\subinputfrom}{\@doimport\input}
+\newcommand{\includefrom}{\global\let\import@path\@empty \@doimport\include}
+\newcommand{\subincludefrom}{\@doimport\include}
+
+% Consume now-meaningless "*"
+\def\@doimport#1{\@ifstar
+  {\@sub@import#1\im@iffileexists}{\@sub@import#1\im@iffileexists}}
+
+% #1 = import command,  #2 = switch for *,  #3 = import path extension
+\def\@sub@import#1#2#3{%
+  \begingroup
+  \protected@edef\@tempa{\endgroup
+    \let\noexpand\IfFileExists\noexpand#2%
+    \noexpand\@import  \noexpand#1%  param 1
+      {\@ifundefined{input@path}{}{\input@path}}% 2
+      {\@ifundefined{Ginput@path}{}{\Ginput@path}}% 3
+      {\import@path#3}{\import@path}% 4,5
+      {\ifx\IfFileExists\im@@IfFileExists \noexpand\im@@IfFileExists 
+       \else \noexpand\IfFileExists \fi}}% 6
+  \@tempa}
+%
+% #1 = import command (\input or \include)
+% #2 = previous input path list. #3 = previous graphics input path list.
+% #4 = full path added to each.  #5 = previous import path.  
+% #6 = previous \IfFileExists.   #7 = file name.
+%
+\def\@import#1#2#3#4#5#6#7{%
+  \protected@xdef\import@path{\import@path@fix{#4}}%
+  \protected@edef\input@path{{\import@path}#2}%
+  \protected@edef\Ginput@path{{\import@path}#3}%
+  \protected@edef\import@path@file{% use full path/file for non-*
+    \import@path #7}%
+%
+  \expandafter#1\expandafter{\import@path@file}%
+%
+  \let\IfFileExists#6% restore after \import*
+  \gdef\import@path{#5}%
+  \def\input@path{#2}\ifx\input@path\@empty \let\input@path\@undefined \fi
+  \def\Ginput@path{#3}\ifx\Ginput@path\@empty \let\Ginput@path\@undefined \fi
+}
+
+% Our version of \IfFileExists that gives priority to files on \input@path,
+% #1 = file name,  #2 = action when exists, #3 = action when not exists
+% In 2020 LaTeX redefines \IfFileExists, so I need two variants.
+\@ifundefined{IfFileExists@}{% pre-2020
+\long\def \im@iffileexists#1#2#3{%
+  \let\@filef@und\@undefined
+  \ifx\input@path\@undefined\else 
+    \@iffileonpath{#1}{% (also defines \@filef@und)
+      \def\reserved@a{#2}%
+    }{}% no action yet for not found
+  \fi
+  \ifx\@filef@und\@undefined % not found on \input@path
+    \openin\@inputcheck#1 %
+    \ifeof\@inputcheck
+      \def\reserved@a{#3}%
+    \else
+      \closein\@inputcheck
+      \edef\@filef@und{#1 }%
+      \def\reserved@a{#2}%
+  \fi\fi
+  \reserved@a}
+}{% ca 2020
+\DeclareRobustCommand\im@iffileexists[1]{%
+  \set@curr@file{#1}%
+  \expandafter\im@iffileexists@\expandafter{\@curr@file}}
+\long\def \im@iffileexists@#1#2#3{%
+  \let\@filef@und\@undefined
+  \ifx\input@path\@undefined\else 
+    \@iffileonpath{#1}{% (also defines \@filef@und)
+      \def\reserved@a{#2}%
+    }{}% no action yet for not found
+  \fi
+  \ifx\@filef@und\@undefined % not found on \input@path
+    \openin\@inputcheck"#1" %
+    \ifeof\@inputcheck
+      \def\reserved@a{#3}%
+    \else
+      \closein\@inputcheck
+      \edef\@filef@und{"#1" }%
+      \def\reserved@a{#2}%
+  \fi\fi
+  \reserved@a}
+ }
+
+\let\im@@IfFileExists\IfFileExists % remember original
+\gdef\import@path{}
+
+\let\import@path@fix\@firstofone % default
+
+% Check for "./" currdir, and make \import@path@fix ensure trailing /
+\gdef\@gtempa{./}
+\ifx\@gtempa\@currdir % *x style paths
+\gdef\import@path@fix#1{\ifx\delimiter#1\delimiter\else
+  \@ensure@one@trailing@slash#1///\delimiter\fi}%
+ \gdef\@ensure@one@trailing@slash#1///#2\delimiter{#1/}%
+\fi
+
+% Check for "[]" currdir (VMS file names) and set \import@path@fix appropriately
+% \subimport{[.subdir]}{file}
+\gdef\@gtempa{[]}
+\ifx\@gtempa\@currdir % VMS directory syntax
+ \gdef\import@path@fix#1{\@gobbleVMSbrack#1][>}
+ \gdef\@gobbleVMSbrack#1][#2{#1\ifx>#2\@empty
+    \expandafter \strip@prefix \fi % Gobble up to >
+    \@gobbleVMSbrack #2}
+\fi

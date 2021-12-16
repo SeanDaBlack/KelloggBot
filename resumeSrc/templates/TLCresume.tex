@@ -1,0 +1,89 @@
+\documentclass[letter,10pt]{article}
+\usepackage[utf8]{inputenc}
+
+%====================
+% File:         resume.tex
+% Editor:       https://github.com/TimmyChan 
+%               https://www.linkedin.com/in/timmy-l-chan/
+% Last Updated: Nov 19, 2021
+% Notes:        All formatting is done in TLCresume.sty
+%               No need to touch that file. 
+%               All actual content is in the sections/ folder.
+%====================
+
+\usepackage{TLCresume}
+
+%====================
+% CONTACT INFORMATION
+%====================
+\author{@@NAME@@} % Name Here
+\def\phone{@@PHONE@@}
+\def\email{@@EMAIL@@}
+\def\role{@@JOB@@} % JOB TITLE
+
+\begin{document}
+
+% header
+\begin{center}
+	\begin{minipage}[b]{.3\textwidth}
+	\raggedright
+	{\large \phone} \\ % PHONE
+	\end{minipage}%
+	\begin{minipage}[b]{.4\textwidth}
+	\makeatletter
+	\centering {\HUGE \@author} \\
+	\makeatother
+    \vspace{.5em}
+    {\color{highlight} \Large{\role}}
+	\end{minipage}%
+	\begin{minipage}[b]{.3\textwidth}
+	\raggedleft 
+	\href{mailto:\email}{\email} % EMAIL
+	\end{minipage}
+
+{\color{highlight} \hrule}
+\end{center}
+
+% objective
+@@PARAGRAPH@@ @@PARAGRAPH@@ @@PARAGRAPH@@
+
+\section{Skills}
+\begin{zitemize}
+    \item @@WORDS@@
+    \item @@WORDS@@
+    \item @@WORDS@@
+    \item @@WORDS@@
+    \item @@WORDS@@
+\end{zitemize}
+
+\section{Experience}
+%====================
+% EXPERIENCE A
+%====================
+\subsection{{@@JOB@@ \hfill @@MIDDLEYEAR@@ --- @@THISYEAR@@}}
+\subtext{@@COMPANY@@}
+\begin{zitemize}
+\item @@WORDS@@
+\item @@WORDS@@
+\item @@WORDS@@
+\item @@WORDS@@
+\item @@WORDS@@
+\end{zitemize}
+
+%====================
+% EXPERIENCE B
+%====================
+\subsection{{@@JOB@@ \hfill @@GRADYEAR@@ --- @@MIDDLEYEAR@@}}
+\subtext{@@COMPANY@@}
+\begin{zitemize}
+\item @@WORDS@@
+\item @@WORDS@@
+\item @@WORDS@@
+\item @@WORDS@@
+\item @@WORDS@@
+\end{zitemize}
+
+\section{Education}
+\skills{@@DEGREE@@}, \textit{@@UNIVERSITY@@}	\hfill May @@GRADYEAR@@
+
+\end{document}

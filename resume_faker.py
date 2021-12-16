@@ -2087,7 +2087,7 @@ DEGREES = [
 ]
 
 
-def make_resume(name, email, phone, filename='resume'):
+def make_resume(name: str=fake.name(), email=fake.free_email(), phone=fake.phone_number(), filename='resume'):
     for ext in ['tex','aux','log','out']:
         try:
             os.remove(PACKAGES_FOLDER+'auto_resume.'+ext)
@@ -2098,7 +2098,8 @@ def make_resume(name, email, phone, filename='resume'):
     grad_year = random.randrange(1990,year-10)
     midyear = int(grad_year + (year-grad_year)*0.1*random.randrange(3,7))
 
-    template = random.choice([file for file in os.listdir(TEMPLATES_FOLDER) if file.endswith('.tex')])
+    template = 'developercv.tex' # for testing
+    #template = random.choice([file for file in os.listdir(TEMPLATES_FOLDER) if file.endswith('.tex')])
 
     with open(TEMPLATES_FOLDER+template) as input, open(PACKAGES_FOLDER+'auto_resume.tex', 'a') as output:
         for line in input.readlines():
@@ -2107,8 +2108,12 @@ def make_resume(name, email, phone, filename='resume'):
             line = re.sub('@@BS@@', fake.bs(), line)
 
             line = re.sub('@@NAME@@', name, line)
+            line = re.sub('@@FIRSTNAME@@', name.split(' ', 2)[0], line)
+            line = re.sub('@@LASTNAME@@', name.split(' ', 2)[-1], line)
+
             line = re.sub('@@PHONE@@', phone, line)
             line = re.sub('@@EMAIL@@', email, line)
+            line = re.sub('@@CITY@@', fake.city(), line)
 
             line = re.sub('@@UNIVERSITY@@', random.choice(UNIVERSITIES), line)
             line = re.sub('@@DEGREE@@', random.choice(DEGREES), line)
