@@ -148,7 +148,7 @@ def make_resume(name, email, path = 'output.pdf'):
         'Bachelor of Music in Theory',
         'Bachelor of Music in Music Education',
         'Bachelor of Science in Veterinary Technology',
-        'Bachelor of Science in military and strategic studies',
+        'Bachelor of Science in Military and Strategic Studies',
     ]
 
     unis = [
