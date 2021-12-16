@@ -16,7 +16,6 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from resume_faker import make_resume
-from pdf2image import convert_from_path
 
 from webdriver_manager.chrome import ChromeDriverManager
 os.environ['WDM_LOG_LEVEL'] = '0'
@@ -32,7 +31,7 @@ from constants.urls import *
 from constants.xPaths import *
 from constants.areaCodes import *
 
-os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
+# os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
 
 fake = Faker()
 
@@ -48,10 +47,12 @@ args = parser.parse_args()
 # END TEST
 
 def start_driver(random_city):
-    options = Options()
+    options = webdriver.ChromeOptions()
     if (args.debug == DEBUG_DISABLED):
         options.add_argument(f"user-agent={USER_AGENT}")
         options.add_argument('disable-blink-features=AutomationControlled')
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        options.add_argument('--incognito')
         options.headless = True
         driver = webdriver.Chrome(ChromeDriverManager().install(),options=options)
         driver.set_window_size(1440, 900)
@@ -128,9 +129,8 @@ def generate_account(driver, fake_identity):
 def fill_out_application_and_submit(driver, random_city, fake_identity):
     # make resume
     resume_filename = fake_identity['last_name']+'-Resume'
-    make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], fake_identity['phone'], resume_filename)
-    images = convert_from_path(resume_filename+'.pdf')
-    images[0].save(resume_filename+'.png', 'PNG')
+    college_name = make_resume(fake_identity['first_name']+' '+fake_identity['last_name'], fake_identity['email'], fake_identity['phone'], resume_filename)
+    printf(f"successfully created resume file: {resume_filename}.pdf")
 
     # wait for page to load
     WebDriverWait(driver, 10).until(expected_conditions.presence_of_element_located((By.XPATH, PROFILE_INFORMATION_DROPDOWN)))
@@ -140,16 +140,15 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
     driver.find_element_by_xpath(CANDIDATE_SPECIFIC_INFORMATION_DROPDOWN).click()
 
     for key in XPATHS_1.keys():
-
         if key == 'resume':
             driver.find_element_by_xpath(UPLOAD_A_RESUME_BUTTON).click()
-            info = os.getcwd() + '/'+resume_filename+'.png'
+            info = os.path.join(os.getcwd(), resume_filename+'.pdf')
         elif key == 'addy':
             info = fake.street_address()
         elif key == 'city':
             info = random_city
         elif key == 'zip':
-            info = CITIES_TO_ZIP_CODES[random_city]
+            info = CITIES_TO_ZIP_CODES[random_city][random.randint(0, 5)]
         elif key == 'job':
             info = fake.job()
         elif key == 'salary':
@@ -157,45 +156,69 @@ def fill_out_application_and_submit(driver, random_city, fake_identity):
             info = f'{format(first, ",")}-{format(random.randrange(first + 5000, 35000, 5000), ",")}'
 
         driver.find_element_by_xpath(XPATHS_1.get(key)).send_keys(info)
+        if key == 'resume': time.sleep(8) # wait for "loading" animation  <----- can probably be replaced with WebDriverWait
 
     printf(f"successfully filled out app forms for {random_city}")
 
     # fill out dropdowns
-    select = Select(driver.find_element_by_id(CITIZEN_QUESTION_LABEL))
+    select = Select(driver.find_element_by_name(CITIZEN_QUESTION_LABEL))
     select.select_by_visible_text(YES)
-    select = Select(driver.find_element_by_id(COUNTRY_OF_ORIGIN_LABEL))
+    select = Select(driver.find_element_by_name(COUNTRY_OF_ORIGIN_LABEL))
     select.select_by_visible_text(FULL_NAME_US)
-    select = Select(driver.find_element_by_id(EIGHTEEN_YEARS_OLD_LABEL))
+    select = Select(driver.find_element_by_name(EIGHTEEN_YEARS_OLD_LABEL))
     select.select_by_visible_text(YES)
-    select = Select(driver.find_element_by_id(REQUIRE_SPONSORSHIP_LABEL))
+    select = Select(driver.find_element_by_name(REQUIRE_SPONSORSHIP_LABEL))
     select.select_by_visible_text(NO)
-    select = Select(driver.find_element_by_id(PREVIOUSLY_WORKED_LABEL))
+    select = Select(driver.find_element_by_name(PREVIOUSLY_WORKED_LABEL))
     select.select_by_visible_text(NO)
-    select = Select(driver.find_element_by_id(PREVIOUSLY_PARTNERED_LABEL))
+    select = Select(driver.find_element_by_name(PREVIOUSLY_PARTNERED_LABEL))
     select.select_by_visible_text(NO)
-    select = Select(driver.find_element_by_id(RELATIVE_WORKER_LABEL))
+    select = Select(driver.find_element_by_name(RELATIVE_WORKER_LABEL))
     select.select_by_visible_text(NO)
-    select = Select(driver.find_element_by_id(ESSENTIAL_FUNCTIONS_LABEL))
+    select = Select(driver.find_element_by_name(ESSENTIAL_FUNCTIONS_LABEL))
     select.select_by_visible_text(YES)
-    select = Select(driver.find_element_by_id(PREVIOUSLY_PARTNERED_LABEL))
+    select = Select(driver.find_element_by_name(PREVIOUSLY_PARTNERED_LABEL))
     select.select_by_visible_text(NO)
     time.sleep(1)
-    select = Select(driver.find_element_by_id(GENDER_LABEL))
+    select = Select(driver.find_element_by_name(GENDER_LABEL))
     gender = random.choice(GENDERS_LIST)
     select.select_by_visible_text(gender)
     driver.find_element_by_xpath(MIXER_QUESTION_1_LABEL).click()
     driver.find_element_by_xpath(MIXER_QUESTION_2_LABEL).click()
 
+    # Optional Info
+    try:
+        driver.find_element_by_xpath('//select[@name="' + STATE_LABEL + '"]/option[text()="' + CITIES_TO_STATES[random_city] + '"]').click()
+        driver.find_element_by_xpath('//select[@name="' + PRESENT_EMPLOYEE + '"]/option[text()="' + random.choice([YES, NO]) + '"]').click()
+        driver.find_element_by_xpath('//select[@name="' + REFERRAL_LABEL + '"]/option[text()="' + random.choice(REFERRAL_LIST) + '"]').click()
+        driver.find_element_by_xpath('//select[@name="' + ETHNICITY_LABEL + '"]/option[text()="' + random.choice(ETHNICITY_LIST) + '"]').click()
+    except:
+        printf('Some optional info left blank')
+        pass
+
     els = driver.find_elements_by_xpath(LONG_PERIODS_QUESTION_LABEL)
     [el.click() for el in els]
 
-    time.sleep(5)
+    fill_out_education_info(driver, college_name)
+    fill_out_work_history(driver)
+
+    time.sleep(3)
     driver.find_element_by_xpath(APPLY_BUTTON).click()
-    printf(f"successfully submitted application")
+    time.sleep(3)
+    try:
+        driver.find_element_by_xpath('//*[@class="rcmSuccessBackToResultsBtn"]')
+        printf(f"successfully submitted application")
+    except Exception as e:
+        printf(e)
+        if (args.debug == DEBUG_ENABLED):
+            printf(f'There may be unfilled entries. You have 15 seconds to fill the missing info and click APPLY')
+            time.sleep(15)
+        elif (args.debug == DEBUG_DISABLED):
+            printf(f'Could not confirm submission. There may have been unfilled entries.')
 
     # take out the trash
     os.remove(resume_filename+'.pdf')
-    os.remove(resume_filename+'.png')
+
 
 def random_email(name=None):
     if name is None:
@@ -210,6 +233,29 @@ def random_email(name=None):
 
     return random.choices(mailGens, MAIL_GENERATION_WEIGHTS)[0](*name.split(" ")).lower() + "@" + \
            requests.get('https://api.mail.tm/domains').json().get('hydra:member')[0].get('domain')
+
+def fill_out_education_info(driver, college):
+    try:
+        driver.find_element_by_xpath(DEGREE_COMPLETION_LABEL + '/option[text()="' + random.choice(GRADUATION_STATUS) + '"]').click()
+        driver.find_element_by_xpath(DEGREE_MAJOR_LABEL + '/option[text()="' + random.choice(DEGREE_MAJORS) + '"]').click()
+        driver.find_element_by_xpath(DEGREE_TYPE_LABEL + '/option[text()="' + random.choice(DEGREE_TYPES) + '"]').click()
+        driver.find_element_by_xpath(EDUCATION_INSTITUTION).send_keys(college)
+        printf('successfully filled out degree information')
+    except Exception as e:
+        printf(f'FAILED TO FILL OUT EDUCATION INFO: {e}')
+        # TODO: Implement click "remove" on education info section
+    time.sleep(2)
+
+
+def fill_out_work_history(driver):
+    for i in range(2):
+        try:
+            driver.find_element_by_xpath('(//select[@name="' + INDUSTRY_LABEL + '"]/option[text()="' + random.choice(INDUSTRY_LIST) + '"])[' + str(i+1) + ']').click()
+            if i == 2: printf(f'successfully filled out work history information')
+        except Exception as e:
+            printf(f'FAILED TO FILL OUT WORK HISTORY: {e}')
+            # TODO: Implement click "remove" on work history section
+            break
 
 def random_phone(format=None):
     area_code = str(random.choice(AREA_CODES))

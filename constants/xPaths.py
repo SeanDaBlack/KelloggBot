@@ -1,11 +1,11 @@
 XPATHS_1 = {
     'resume': '//*[@id="49:_file"]',
-    'addy': '//*[@id="69:_txtFld"]',
-    'city': '//*[@id="73:_txtFld"]',
-    'zip': '//*[@id="81:_txtFld"]',
-    'job': '//*[@id="101:_txtFld"]',
-    'salary': '//*[@id="172:_txtFld"]',
-    'country': '//*[@id="195:_select"]'
+    'addy': '//*[@name="address"]',
+    'city': '//*[@name="city"]',
+    'zip': '//*[@name="zip"]',
+    'job': '//*[@name="currentTitle"]',
+    'salary': '//*[@name="expectedSalaryRange"]',
+    'country': '//*[@name="country"]'
 }
 
 XPATHS_2 = {
@@ -32,4 +32,10 @@ UPLOAD_A_RESUME_BUTTON = '//*[@id="48:_attach"]/div[6]'
 MIXER_QUESTION_1_LABEL = '//label[text()="350 LBS"]'
 MIXER_QUESTION_2_LABEL = '//label[text()="800 LBS"]'
 LONG_PERIODS_QUESTION_LABEL = '//label[text()="Yes"]'
-APPLY_BUTTON = '//*[@id="261:_submitBtn"]'
+APPLY_BUTTON = '//span[text()="Apply"]'
+
+# Education Info
+DEGREE_COMPLETION_LABEL = '//select[@name="VFLD4"]'
+DEGREE_MAJOR_LABEL =  '//select[@name="VFLD2"]'
+DEGREE_TYPE_LABEL =  '//select[@name="VFLD3"]'
+EDUCATION_INSTITUTION = '//*[@name="VFLD1"]'

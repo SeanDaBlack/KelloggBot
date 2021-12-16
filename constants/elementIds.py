@@ -1,15 +1,29 @@
 COUNTRY_REGION_CODE_LABEL = 'fbclc_ituCode'
 COUNTRY_REGION_OF_RESIDENCE_LABEL = 'fbclc_country'
-CITIZEN_QUESTION_LABEL = '154:_select'
-COUNTRY_OF_ORIGIN_LABEL = '195:_select'
-EIGHTEEN_YEARS_OLD_LABEL = '211:_select'
-REQUIRE_SPONSORSHIP_LABEL = '215:_select'
-PREVIOUSLY_WORKED_LABEL = '219:_select'
-PREVIOUSLY_PARTNERED_LABEL = '223:_select'
-RELATIVE_WORKER_LABEL = '227:_select'
-ESSENTIAL_FUNCTIONS_LABEL = '231:_select'
-GENDER_LABEL = '235:_select'
+
+# Candidate-Specific Information
+CITIZEN_QUESTION_LABEL = 'citizen'
+COUNTRY_OF_ORIGIN_LABEL = 'custCountry'
+EIGHTEEN_YEARS_OLD_LABEL = 'custAge'
+REQUIRE_SPONSORSHIP_LABEL = 'cust_sponsor'
+PREVIOUSLY_WORKED_LABEL = 'custPrev'
+PREVIOUSLY_PARTNERED_LABEL = 'custcontr'
+RELATIVE_WORKER_LABEL = 'custRel'
+ESSENTIAL_FUNCTIONS_LABEL = 'custAccom'
+GENDER_LABEL = 'custgender'
+REFERRAL_LABEL = 'candidateSource'
+ETHNICITY_LABEL = 'ethnicity'
+DISABILITY_LABEL = 'disabilityselection'
+
+# Captcha
 RECAPTCHA_AUDIO_BUTTON = 'recaptcha-audio-button'
 RECAPTCHA_ANCHOR = 'recaptcha-anchor'
 AUDIO_SOURCE = 'audio-source'
 AUDIO_RESPONSE = 'audio-response'
+
+# Profile Information
+STATE_LABEL = 'state'
+PRESENT_EMPLOYEE = 'presentEmployer'
+
+# Outside Work Experience
+INDUSTRY_LABEL = 'VFLD2'
