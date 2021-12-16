@@ -242,7 +242,7 @@ def main():
             'first_name': fake_first_name,
             'last_name': fake_last_name,
             'email': fake_email,
-            'phone': fake_phone
+            'phone': fake_phone,
             'sid' : mail_sid
         }
 
