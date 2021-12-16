@@ -1,0 +1,229 @@
+% Source Sans Pro for LaTeX
+%
+% Silke Hofstra, tex@slxh.nl
+%
+% This file selects either the OTF or the TYPE1 fonts based on
+% the LaTeX engine used.
+%
+% Licenced under the LPPL v1.3 or higher.
+%
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{sourcesanspro}[2018/05/19 v2.7 Adobe's Source Sans Pro typeface]
+
+\RequirePackage{ifxetex,ifluatex,xkeyval}
+
+% Switches
+\newif\ifsourcesanspro@otf
+\newif\ifsourcesanspro@default
+\newif\ifsourcesanspro@sfdefault
+\newif\ifsourcesanspro@oldstyle
+\newif\ifsourcesanspro@tabular
+\newif\ifsourcesanspro@black
+\newif\ifsourcesanspro@semibold
+\newif\ifsourcesanspro@light
+\newif\ifsourcesanspro@extralight
+
+% Scaling command
+\newcommand*{\SourceSansPro@scale}{1}
+
+% Use OpenType fonts for XeTeX and LuaTeX.
+\ifxetex
+	\sourcesanspro@otftrue
+\else
+	\ifluatex
+		\sourcesanspro@otftrue
+	\fi
+\fi
+
+\DeclareOptionX{lining}      {\sourcesanspro@oldstylefalse}
+\DeclareOptionX{nf}          {\sourcesanspro@oldstylefalse}
+\DeclareOptionX{lf}          {\sourcesanspro@oldstylefalse}
+\DeclareOptionX{oldstyle}    {\sourcesanspro@oldstyletrue}
+\DeclareOptionX{osf}         {\sourcesanspro@oldstyletrue}
+\DeclareOptionX{tabular}     {\sourcesanspro@tabulartrue}
+\DeclareOptionX{proportional}{\sourcesanspro@tabularfalse}
+\DeclareOptionX{black}       {\sourcesanspro@blacktrue \sourcesanspro@semiboldfalse}
+\DeclareOptionX{semibold}    {\sourcesanspro@blackfalse\sourcesanspro@semiboldtrue}
+\DeclareOptionX{bold}        {\sourcesanspro@blackfalse\sourcesanspro@semiboldfalse}
+\DeclareOptionX{light}       {\sourcesanspro@lighttrue \sourcesanspro@extralightfalse}
+\DeclareOptionX{extralight}  {\sourcesanspro@lightfalse\sourcesanspro@extralighttrue}
+\DeclareOptionX{regular}     {\sourcesanspro@lightfalse\sourcesanspro@extralightfalse}
+\DeclareOptionX{scale}       {\renewcommand*{\SourceSansPro@scale}{#1}}
+\DeclareOptionX{scaled}      {\renewcommand*{\SourceSansPro@scale}{#1}}
+\DeclareOptionX{default}     {\sourcesanspro@defaulttrue}
+\DeclareOptionX{sfdefault}   {\sourcesanspro@sfdefaulttrue}
+\DeclareOptionX{nosfdefault} {\sourcesanspro@sfdefaultfalse}
+\DeclareOptionX{type1}       {\sourcesanspro@otffalse}
+\DeclareOptionX{t1}          {\sourcesanspro@otffalse}
+\DeclareOptionX{opentype}    {\sourcesanspro@otftrue}
+\DeclareOptionX{otf}         {\sourcesanspro@otftrue}
+
+% Default options
+\ExecuteOptionsX{sfdefault,lining,tabular,bold,regular}
+\ProcessOptionsX\relax
+
+% Load OpenType files
+\ifsourcesanspro@otf
+	\RequirePackage{fontspec}
+
+	% Create a fixed liningnums command:
+	\renewcommand*\liningnums[1]{{\addfontfeature{RawFeature=+lnum;-onum}#1}}
+
+	% Oldstyle/Lining
+	\ifsourcesanspro@oldstyle
+		\def\sourcesanspro@figurestyle{OldStyle}
+	\else
+		\def\sourcesanspro@figurestyle{}
+	\fi
+
+	% Tabular/Proportional
+	\ifsourcesanspro@tabular
+		\def\sourcesanspro@figurealign{}
+	\else
+		\def\sourcesanspro@figurealign{Proportional}
+	\fi
+
+	% Black/Semibold/Bold
+	\ifsourcesanspro@black
+		\def\sourcesanspro@boldstyle{Black}
+	\else
+		\ifsourcesanspro@semibold
+			\def\sourcesanspro@boldstyle{Semibold}
+		\else
+			\def\sourcesanspro@boldstyle{Bold}
+		\fi
+	\fi
+
+	% Light/ExtraLight/Regular
+	\ifsourcesanspro@light
+		\def\sourcesanspro@regstyle{Light}
+	\else
+		\ifsourcesanspro@extralight
+			\def\sourcesanspro@regstyle{ExtraLight}
+		\else
+			\def\sourcesanspro@regstyle{Regular}
+		\fi
+	\fi
+
+	% Shared features
+	\defaultfontfeatures{
+		Ligatures = TeX ,
+		Numbers   = {\sourcesanspro@figurealign , \sourcesanspro@figurestyle } ,
+		Scale     = \SourceSansPro@scale ,
+		Extension = .otf }
+
+	% Sans serif font
+	\ifsourcesanspro@sfdefault
+		\setsansfont
+			[ UprightFont    = *-\sourcesanspro@regstyle ,
+			  ItalicFont     = *-\sourcesanspro@regstyle It ,
+			  BoldFont       = *-\sourcesanspro@boldstyle ,
+			  BoldItalicFont = *-\sourcesanspro@boldstyle It]
+			{SourceSansPro}
+	\fi
+
+	% Font families
+	% Regular/Bold
+	\newfontfamily\sourcesanspro
+		[ UprightFont    = *-Regular ,
+		  ItalicFont     = *-RegularIt ,
+		  BoldFont       = *-Bold ,
+		  BoldItalicFont = *-BoldIt ]
+		{SourceSansPro}
+
+	% Light/Semibold
+	\newfontfamily\sourcesansprolight
+		[ UprightFont    = *-Light ,
+		  ItalicFont     = *-LightIt ,
+		  BoldFont       = *-Semibold ,
+		  BoldItalicFont = *-SemiboldIt ]
+		{SourceSansPro}
+
+	% ExtraLight/Black
+	\newfontfamily\sourcesansproextreme
+		[ UprightFont    = *-ExtraLight ,
+		  ItalicFont     = *-ExtraLightIt ,
+		  BoldFont       = *-Black ,
+		  BoldItalicFont = *-BlackIt ]
+		{SourceSansPro}
+
+	% Lining figures
+	\newfontfamily\sourcesansprolf
+		[ Numbers        = \sourcesanspro@figurealign ,
+		  UprightFont    = *-\sourcesanspro@regstyle ,
+		  ItalicFont     = *-\sourcesanspro@regstyle It ,
+		  BoldFont       = *-\sourcesanspro@boldstyle ,
+		  BoldItalicFont = *-\sourcesanspro@boldstyle It ]
+		{SourceSansPro}
+
+	% Dont keep all default font features
+	\defaultfontfeatures{}
+
+% Load type1 font.
+\else
+	\RequirePackage[OT1,LY1,T1]{fontenc}
+	\RequirePackage{mweights}
+
+	% Oldstyle/Lining
+	\ifsourcesanspro@oldstyle
+		\def\sourcesanspro@figurestyle{OsF}
+	\else
+		\def\sourcesanspro@figurestyle{LF}
+	\fi
+
+	% Tabular/Proportional
+	\ifsourcesanspro@tabular
+		\def\sourcesanspro@figurealign{T}
+	\else
+		\def\sourcesanspro@figurealign{}
+	\fi
+
+	% Black/Semibold/Bold
+	\ifsourcesanspro@black
+		\def\bfseries@sf{eb}
+	\else
+		\ifsourcesanspro@semibold
+			\def\bfseries@sf{sb}
+		\else
+			\def\bfseries@sf{b}
+		\fi
+	\fi
+
+	% Light/ExtraLight/Regular
+	\ifsourcesanspro@light
+		\def\mdseries@sf{l}
+	\else
+		\ifsourcesanspro@extralight
+			\def\mdseries@sf{el}
+		\else
+			\def\mdseries@sf{m}
+		\fi
+	\fi
+
+	% Sans serif font
+	\ifsourcesanspro@sfdefault
+		\edef\sfdefault{SourceSansPro-\sourcesanspro@figurealign\sourcesanspro@figurestyle}
+	\fi
+
+	% If source sans pro is the default font \oldstylenums needs a new definition.
+	\ifsourcesanspro@default
+		\let\nativeoldstylenums\oldstylenums
+		\renewcommand*\oldstylenums[1]{%
+			\begingroup
+				\ifmmode
+					\mathgroup\symletters #1%
+				\else
+					\fontfamily{SourceSansPro-\sourcesanspro@figurealign OsF}\selectfont #1%
+				\fi
+			\endgroup
+		}
+		\edef\seriesdefault{\mdseries@sf}
+	\fi
+\fi
+
+% Set default font family
+\ifsourcesanspro@default
+	\edef\familydefault{\sfdefault}
+\fi
+
+\endinput

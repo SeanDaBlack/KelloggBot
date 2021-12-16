@@ -29,6 +29,7 @@ from constants.location import *
 from constants.parser import *
 from constants.urls import *
 from constants.xPaths import *
+from constants.areaCodes import *
 
 # os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
 
@@ -245,6 +246,24 @@ def fill_out_work_history(driver):
             # TODO: Implement click "remove" on work history section
             pass
 
+def random_phone(format=None):
+    area_code = str(random.choice(AREA_CODES))
+    middle_three = str(random.randint(0,999)).rjust(3,'0')
+    last_four = str(random.randint(0,9999)).rjust(4,'0')
+
+    if format is None:
+        format = random.randint(0,4)
+
+    if format==0:
+        return area_code+middle_three+last_four
+    elif format==1:
+        return area_code+' '+middle_three+' '+last_four
+    elif format==2:
+        return area_code+'.'+middle_three+'.'+last_four
+    elif format==3:
+        return area_code+'-'+middle_three+'-'+last_four
+    elif format==4:
+        return '('+area_code+') '+middle_three+'-'+last_four
 
 def main():
     while True:
@@ -259,8 +278,7 @@ def main():
 
         fake_first_name = fake.first_name()
         fake_last_name = fake.last_name()
-        fake_phone = fake.phone_number()
-        
+        fake_phone = random_phone()
         if (args.mailtm == MAILTM_DISABLED):
             printf(f"USING GUERRILLA TO CREATE EMAIL")
             response = requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').json()

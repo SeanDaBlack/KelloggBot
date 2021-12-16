@@ -2089,7 +2089,7 @@ DEGREES = [
 ]
 
 
-def make_resume(name, email, phone, filename='resume'):
+def make_resume(name: str=fake.name(), email=fake.free_email(), phone=fake.phone_number(), filename='resume'):
     for ext in ['tex','aux','log','out']:
         try:
             os.remove(os.path.join(PACKAGES_FOLDER, 'auto_resume.'+ext))
@@ -2108,8 +2108,12 @@ def make_resume(name, email, phone, filename='resume'):
             line = re.sub('@@BS@@', fake.bs(), line)
 
             line = re.sub('@@NAME@@', name, line)
+            line = re.sub('@@FIRSTNAME@@', name.split(' ', 2)[0], line)
+            line = re.sub('@@LASTNAME@@', name.split(' ', 2)[-1], line)
+
             line = re.sub('@@PHONE@@', phone, line)
             line = re.sub('@@EMAIL@@', email, line)
+            line = re.sub('@@CITY@@', fake.city(), line)
 
             line = re.sub('@@UNIVERSITY@@', random.choice(UNIVERSITIES), line)
             line = re.sub('@@DEGREE@@', random.choice(DEGREES), line)
