@@ -30,7 +30,7 @@
 %	TITLE AND CONTACT INFORMATION
 %----------------------------------------------------------------------------------------
 
-\begin{minipage}[t]{0.45\textwidth} % 45% of the page width for name
+\begin{minipage}[t]{0.6\textwidth} % 45% of the page width for name
 	\vspace{-\baselineskip} % Required for vertically aligning minipages
 	
 	% If your name is very short, use just one of the lines below
@@ -43,15 +43,14 @@
 	
 	{\huge @@JOB@@} % Career or current job title
 \end{minipage}
-\hfill
-\begin{minipage}[t]{0.275\textwidth} % 27.5% of the page width for the first row of icons
+\begin{minipage}[t]{0.4\textwidth} % 27.5% of the page width for the first row of icons
 	\vspace{-\baselineskip} % Required for vertically aligning minipages
-	
+	\raggedleft
 	% The first parameter is the FontAwesome icon name, the second is the box size and the third is the text
 	% Other icons can be found by referring to fontawesome.pdf (supplied with the template) and using the word after \fa in the command for the icon you want
-	\icon{MapMarker}{12}{@@CITY@@}\\
-	\icon{Phone}{12}{@@PHONE@@}\\
-	\icon{At}{12}{\href{mailto:@@EMAIL@@}{@@EMAIL@@}}\\	
+	\icon{MapMarker}{12}{@@CITY@@} \linebreak
+	\icon{Phone}{12}{@@PHONE@@} \\
+	\icon{At}{12}{\href{mailto:@@EMAIL@@}{@@EMAIL@@}} \\	
 \end{minipage}
 
 \vspace{0.5cm}
