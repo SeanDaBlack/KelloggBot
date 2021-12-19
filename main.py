@@ -22,8 +22,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 os.environ['WDM_LOG_LEVEL'] = '0'
 
 from constants.common import *
-from constants.fileNames import *
-from constants.classNames import *
 from constants.elementIds import *
 from constants.email import *
 from constants.location import *
@@ -31,8 +29,6 @@ from constants.parser import *
 from constants.urls import *
 from constants.xPaths import *
 from constants.areaCodes import *
-
-os.environ["PATH"] += ":/usr/local/bin" # Adds /usr/local/bin to my path which is where my ffmpeg is stored
 
 fake = Faker()
 
@@ -230,20 +226,12 @@ def random_phone(format=None):
     elif format==4:
         return '('+area_code+') '+middle_three+'-'+last_four
 
-def main():
-    while True:
-        random_city = random.choice(list(CITIES_TO_URLS.keys()))
-        try:
-            driver = start_driver(random_city)
-        except Exception as e:
-            printf(f"FAILED TO START DRIVER: {e}")
-            pass
+def random_identity():
+    fake_first_name = fake.first_name()
+    fake_last_name = fake.last_name()
+    fake_phone = random_phone()
 
-        time.sleep(2)
-
-        fake_first_name = fake.first_name()
-        fake_last_name = fake.last_name()
-        fake_phone = random_phone()
+    try:
         if (args.mailtm == MAILTM_DISABLED):
             printf(f"USING GUERRILLA TO CREATE EMAIL")
             response = requests.get('https://api.guerrillamail.com/ajax.php?f=get_email_address').json()
@@ -257,14 +245,30 @@ def main():
             fake_email = requests.post('https://api.mail.tm/accounts', data='{"address":"'+random_email(fake_first_name+' '+fake_last_name)+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('address')
             mail_sid = requests.post('https://api.mail.tm/token', data='{"address":"'+fake_email+'","password":" "}', headers={'Content-Type': 'application/json'}).json().get('token')
             printf(f"EMAIL CREATED")
+    except:
+        args.mailtm ^= True
+        return random_identity()
 
-        fake_identity = {
-            'first_name': fake_first_name,
-            'last_name': fake_last_name,
-            'email': fake_email,
-            'phone': fake_phone,
-            'sid' : mail_sid
-        }
+    return {
+        'first_name': fake_first_name,
+        'last_name': fake_last_name,
+        'email': fake_email,
+        'phone': fake_phone,
+        'sid' : mail_sid
+    }
+
+def main():
+    while True:
+        random_city = random.choice(list(CITIES_TO_URLS.keys()))
+        try:
+            driver = start_driver(random_city)
+        except Exception as e:
+            printf(f"FAILED TO START DRIVER: {e}")
+            pass
+
+        time.sleep(2)
+
+        fake_identity = random_identity()
 
         try:
             generate_account(driver, fake_identity)

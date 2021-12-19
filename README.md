@@ -18,10 +18,6 @@ If you are having issues opening having it open chrome, check https://github.com
 
 Poppler must be installed for pdf2image. Follow the instructions at https://pdf2image.readthedocs.io/en/latest/installation.html to install.
 
-You will also need to install ffmpeg if it is not already installed:
-[Mac installation guide](https://superuser.com/a/624562)
-[Windows installation guide](https://www.wikihow.com/Install-FFmpeg-on-Windows)
-
 `pdflatex` must also be available. If you're unsure where to start with that, follow the [official instructions](https://www.latex-project.org/get/).
 (Mac users: I'd recommend using [Homebrew](https://brew.sh/) to install [BasicTex](https://formulae.brew.sh/cask/basictex#default).).
 (On linux you'll have to install the `texlive-latex-base` package on whatever package manager you use.).

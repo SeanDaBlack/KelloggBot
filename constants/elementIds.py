@@ -9,7 +9,4 @@ PREVIOUSLY_PARTNERED_LABEL = '223:_select'
 RELATIVE_WORKER_LABEL = '227:_select'
 ESSENTIAL_FUNCTIONS_LABEL = '231:_select'
 GENDER_LABEL = '235:_select'
-RECAPTCHA_AUDIO_BUTTON = 'recaptcha-audio-button'
-RECAPTCHA_ANCHOR = 'recaptcha-anchor'
-AUDIO_SOURCE = 'audio-source'
-AUDIO_RESPONSE = 'audio-response'
+
