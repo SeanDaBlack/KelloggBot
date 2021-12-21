@@ -22,6 +22,12 @@ Poppler must be installed for pdf2image. Follow the instructions at https://pdf2
 (Mac users: I'd recommend using [Homebrew](https://brew.sh/) to install [BasicTex](https://formulae.brew.sh/cask/basictex#default).).
 (On linux you'll have to install the `texlive-latex-base` package on whatever package manager you use.).
 
+If you get a `FileNotFoundError: [WinError 2] The system cannot find the file specified`,
+chances are you're missing some fonts. Running
+`tlmgr install collection-fontsextra` and
+`tlmgr install collection-fontsrecommended`
+in the terminal/command line should fix this.
+
 `python main.py` to run. It will loop until you kill the job. `ctrl + c` in your terminal to give HR a break (optional).
 
 Mac:
